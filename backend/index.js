@@ -6,7 +6,7 @@ const adminRoutes = require("./routes/adminRoutes")
 
 app.use(
     cors({
-        origin: "http://localhost:5173",
+        origin: "https://website-3t2r.vercel.app",
         credentials : true,
     })
 )
