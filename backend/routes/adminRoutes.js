@@ -1,7 +1,7 @@
 const express = require("express")
 const router = express.Router();
-const {AdminSignup,AdminSignin,addProduct,updatePassword} = require("../controller/AdminController")
-const AdminAuth = require("../middleware/adminMiddleware")
+const {AdminSignup,AdminSignin,addProduct,updateProduct,updatePassword} = require("../controller/AdminController")
+const {AdminAuth} = require("../middleware/adminMiddleware")
 
 
 router.post("/AdminSignup",AdminSignup);

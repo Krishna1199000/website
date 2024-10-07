@@ -13,7 +13,7 @@ app.use(
     })
 )
 
-appuse(bodyParser.json());
+app.use(bodyParser.json());
 require("dotenv").config();
 
 const dbConnect = require("./config/db")
