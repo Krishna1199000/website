@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken")
 const {z} = require("zod")
-const Admin = require("../models/admin");
+const Admin = require("../models/Admin/admin");
+const Product = require('../models/Admin/Product')
 const bcrypt = require("bcrypt")
 require("dotenv").config();
 
@@ -82,5 +83,85 @@ exports.AdminSignin = async(req,res) => {
             success: false,
             message: error.message,
         })
+    }
+}
+
+
+const addProductData = z.object({
+    name: z.string().min(1),
+    description: z.string(),
+    price: z.number().positive(),
+    stock: z.number().int().positive()
+})
+exports.addProduct = async (req,res) => {
+    try{
+        const validatedInputs = addProductData.safeParse(req.body);
+
+        if(!validatedInputs.success){
+            return res.status(411).json({message: "Error while adding information"});
+        }
+
+        const product = await Product.create({name,description,price,stock});
+
+        res.status(201).json({message: 'Product added successfully', product});
+    } catch(error){
+        res.status(500).json({message: 'Server error'});
+    }
+}
+const updateProductData = z.object({
+    name: z.string().min(1),
+    description: z.string(),
+    price: z.number().positive(),
+    stock: z.number().int().positive(),
+})
+exports.updateProduct = async(req,res) => {
+    try{
+        const validatedInputs = updateProductData.safeParse(req.body);
+
+        if(validatedInputs){
+            return res.status(411).json({message: "Error while updating information"})
+        }
+
+        const product = await Product.findByIdAndUpdate(productId,updates,{new:true});
+        if(!product){
+            return res.status(404).json({message:'Product not found'});
+        }
+        res.status(200).json({message: 'Product updated successfully', product})
+    } catch(error){
+        res.status(500).json({message: 'Server error '})
+    }
+};
+
+const updatePasswordSchema = z.object({
+    oldPassword: z.string().min(6,'Old password must be at least 6 characters'),
+    newPassword: z.string().min(6, 'New password must be at least 6 characters')
+})
+
+exports.updatePassword = async (req,res ) => {
+    try{
+        const validatedInputs = updatePasswordSchema.safeParse(req.body)
+
+        if(!validatedInputs){
+            return res.status(411).json({message: "Error while updating information"})
+        }
+
+        const admin = await Admin.findById(req.Admin.id);
+        if(!admin) {
+            return res.status(404).json({message: "User not found"});
+        }
+
+        const isMatch = await bcrypt.compare(oldPassword,admin.password);
+        if(!isMatch){
+            return res.status(400).json({message: 'Invalid old password'});
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword,10);
+        admin.password = hashedPassword;
+
+        await admin.save();
+
+        res.status(200).json({message: 'Password updated successfully'});
+    } catch (error) {
+        res.status(500).json({message: 'Server error'});
     }
 }

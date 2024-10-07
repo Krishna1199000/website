@@ -1,4 +1,6 @@
 const express = require("express")
+
+const bodyParser = require('body-parser');
 const app = express();
 const cors = require("cors")
 const userRoutes = require("./routes/userRoutes");
@@ -6,12 +8,12 @@ const adminRoutes = require("./routes/adminRoutes")
 
 app.use(
     cors({
-        origin: "https://website-3t2r.vercel.app",
+        origin: "",
         credentials : true,
     })
 )
 
-app.use(express.json());
+appuse(bodyParser.json());
 require("dotenv").config();
 
 const dbConnect = require("./config/db")
