@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken")
 const {z} = require("zod")
+const mognoose = require('mongoose')
 const Admin = require("../models/Admin/admin");
 const Product = require('../models/Admin/Product')
 const bcrypt = require("bcrypt")
@@ -93,21 +94,48 @@ const addProductData = z.object({
     price: z.number().positive(),
     stock: z.number().int().positive()
 })
-exports.addProduct = async (req,res) => {
-    try{
-        const validatedInputs = addProductData.safeParse(req.body);
+exports.addProduct = async (req, res) => {
+    try {
+        // Destructure required fields from req.body
+        const { name, description, price, stock } = req.body;
 
-        if(!validatedInputs.success){
-            return res.status(411).json({message: "Error while adding information"});
+        // Validate and parse inputs using Zod
+        const validatedInputs = addProductData.safeParse({
+            name,
+            description,
+            price: parseFloat(price),    // Convert to number
+            stock: parseInt(stock, 10)   // Convert to integer
+        });
+
+        if (!validatedInputs.success) {
+            // Return detailed validation errors
+            return res.status(400).json({ 
+                message: "Error while adding information", 
+                errors: validatedInputs.error.errors 
+            });
         }
 
-        const product = await Product.create({name,description,price,stock});
+        // Handle the uploaded image
+        let imageUrl = null;
+        if (req.file) {
+            imageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+        }
 
-        res.status(201).json({message: 'Product added successfully', product});
-    } catch(error){
-        res.status(500).json({message: 'Server error'});
+        // Create the product in the database
+        const product = await Product.create({
+            name: validatedInputs.data.name,
+            description: validatedInputs.data.description,
+            price: validatedInputs.data.price,
+            stock: validatedInputs.data.stock,
+            imageUrl
+        });
+
+        res.status(201).json({ message: 'Product added successfully', product });
+    } catch (error) {
+        console.error('AddProduct Error:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
     }
-}
+};
 const updateProductData = z.object({
     name: z.string().min(1),
     description: z.string(),
@@ -116,12 +144,18 @@ const updateProductData = z.object({
 })
 exports.updateProduct = async(req,res) => {
     try{
+        const {productId} = req.params;
+        const updates = req.body;
+
         const validatedInputs = updateProductData.safeParse(req.body);
 
-        if(validatedInputs){
+        if(!validatedInputs.success){
             return res.status(411).json({message: "Error while updating information"})
         }
 
+        if(req.file){
+            updates.imageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+        }
         const product = await Product.findByIdAndUpdate(productId,updates,{new:true});
         if(!product){
             return res.status(404).json({message:'Product not found'});
@@ -165,3 +199,69 @@ exports.updatePassword = async (req,res ) => {
         res.status(500).json({message: 'Server error'});
     }
 }
+
+exports.getProducts = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const sortBy = req.query.sortBy || 'createdAt';
+        const order = req.query.order === 'desc' ? -1 : 1;
+        const search = req.query.search || '';
+
+        const skip = (page - 1) * limit;
+        const sortOrder = { [sortBy]: order };
+
+        // Build search query if search parameter is provided
+        const query = search
+            ? {
+                $or: [
+                    { name: { $regex: search, $options: 'i' } },
+                    { description: { $regex: search, $options: 'i' } },
+                ],
+            }
+            : {};
+
+        const products = await Product.find(query)
+            .sort(sortOrder)
+            .skip(skip)
+            .limit(limit);
+
+        const total = await Product.countDocuments(query);
+
+        res.status(200).json({
+            success: true,
+            data: products,
+            pagination: {
+                total,
+                page,
+                pages: Math.ceil(total / limit),
+            },
+        });
+    } catch (error) {
+        console.error('GetProducts Error:', error);
+        res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+    }
+};
+
+// Get single product by ID
+exports.getProductById = async (req, res) => {
+    try {
+        const { productId } = req.params;
+
+        // Validate productId
+        if (!mongoose.Types.ObjectId.isValid(productId)) {
+            return res.status(400).json({ success: false, message: 'Invalid Product ID' });
+        }
+
+        const product = await Product.findById(productId);
+
+        if (!product) {
+            return res.status(404).json({ success: false, message: 'Product not found' });
+        }
+
+        res.status(200).json({ success: true, data: product });
+    } catch (error) {
+        console.error('GetProductById Error:', error);
+        res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+    }
+};

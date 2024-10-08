@@ -5,15 +5,17 @@ const app = express();
 const cors = require("cors")
 const userRoutes = require("./routes/userRoutes");
 const adminRoutes = require("./routes/adminRoutes")
+const path = require('path')
 
 app.use(
     cors({
-        origin: "",
+        origin: "http://localhost:5173",
         credentials : true,
     })
 )
 
 app.use(bodyParser.json());
+app.use('/uploads',express.static(path.join(__dirname,'uploads')))
 require("dotenv").config();
 
 const dbConnect = require("./config/db")

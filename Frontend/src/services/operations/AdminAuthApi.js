@@ -39,3 +39,111 @@ export const Adminsignin = async (email,password) => {
         console.log("Error in login")
     }
 };
+
+export const addProductApi = async (productData, token)=> {
+    try{
+        const response = await apiConnector("POST",`${BASE_URL}/admin/products`,productData,{
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+        })
+        return response.data;
+    } catch (error) {
+        console.error("Add Product Error:", error.message);
+        throw error;
+    }
+}
+
+export const getProductApi = async (productId, token) => {
+    try{
+        const response = await apiConnector(
+            "GET",
+            `${BASE_URL}/admin/products/${productId}`,
+            null,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+            }
+        )
+        return response.data;
+    } catch (error) {
+        console.error("Get Product Error:", error.message)
+        throw error;
+    }
+};
+
+export const updateProductApi = async (productId,productData, token) => {
+    try {
+        const response = await apiConnector(
+            "PUT",
+            `${BASE_URL}/admin/products/${productId}`,
+            productData,
+            {
+                headers: {
+                    'Authorization' : `Bearer ${token}`,
+                }
+            }
+        )
+        return response.data;
+    } catch(error) {
+        console.error("Update Product Error:", error.message);
+        throw error;
+    }
+}
+
+export const updatePasswordApi = async (passwordData, token) => {
+    try {
+        const response = await apiConnector(
+            "PUT",
+            `${BASE_URL}/admin/updateCredentials`,
+            passwordData,{
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Update Password Error:',error.message);
+        throw error
+    }
+}
+export const getProductsApi = async (page = 1, limit = 10, sortBy = 'createdAt', order = 'asc', token) => {
+    try {
+        const response = await apiConnector(
+            "GET",
+            `${BASE_URL}/admin/products?page=${page}&limit=${limit}&sortBy=${sortBy}&order=${order}`,
+            null,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Get Products Error:", error.response?.data || error.message);
+        throw error.response?.data || error;
+    }
+};
+
+export const getProductByIdApi = async (productId, token) => {
+    try {
+        const response = await apiConnector(
+            "GET",
+            `${BASE_URL}/admin/products/${productId}`,
+            null,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Get Product By ID Error:", error.response?.data || error.message);
+        throw error.response?.data || error;
+    }
+};
