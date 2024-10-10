@@ -12,6 +12,18 @@ const ProductsList = () => {
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
     const [pages, setPages] = useState(1);
+    const [search,setSearch] = useState('');
+    const [searchTerm,setSearchTerm] = useState('');
+
+    useEffect(()=>{
+        const handler = setTimeout(()=> {
+            setSearchTerm(search);
+            setPage(1);
+        },500)
+        return () => {
+            clearTimeout(handler);
+        }
+    },[search]);
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -31,7 +43,7 @@ const ProductsList = () => {
         };
 
         fetchProducts();
-    }, [page, token]);
+    }, [page, token,searchTerm]);
 
     const handleNextPage = () => {
         if (page < pages) setPage(page + 1);
@@ -39,6 +51,10 @@ const ProductsList = () => {
 
     const handlePrevPage = () => {
         if (page > 1) setPage(page - 1);
+    };
+
+    const handleSearchChange = (e) => {
+        setSearch(e.target.value);
     };
 
     if (loading) {
@@ -52,39 +68,58 @@ const ProductsList = () => {
     return (
         <div className="container mx-auto p-4">
             <h2 className="text-2xl font-bold mb-4">Products List</h2>
-            <table className="w-full bg-white shadow-md rounded-lg overflow-hidden">
-                <thead>
-                    <tr className="bg-gray-200 text-left">
-                        <th className="py-2 px-4">Name</th>
-                        <th className="py-2 px-4">Price</th>
-                        <th className="py-2 px-4">Stock</th>
-                        <th className="py-2 px-4">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {products.map(product => (
-                        <tr key={product._id} className="border-t">
-                            <td className="py-2 px-4">{product.name}</td>
-                            <td className="py-2 px-4">${product.price.toFixed(2)}</td>
-                            <td className="py-2 px-4">{product.stock}</td>
-                            <td className="py-2 px-4">
-                                <button
-                                    onClick={() => navigate(`/admin/update-product/${product._id}`)}
-                                    className="bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-600 transition"
-                                >
-                                    Edit
-                                </button>
-                            </td>
+
+            {/* Search Form */}
+            <div className="mb-4">
+                <input
+                    type="text"
+                    value={search}
+                    onChange={handleSearchChange}
+                    placeholder="Search products..."
+                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+            </div>
+
+            {products.length === 0 ? (
+                <div className="text-center">No products found.</div>
+            ) : (
+                <table className="w-full bg-white shadow-md rounded-lg overflow-hidden">
+                    <thead>
+                        <tr className="bg-gray-200 text-left">
+                            <th className="py-2 px-4">Name</th>
+                            <th className="py-2 px-4">Price</th>
+                            <th className="py-2 px-4">Stock</th>
+                            <th className="py-2 px-4">Actions</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {products.map(product => (
+                            <tr key={product._id} className="border-t">
+                                <td className="py-2 px-4">{product.name}</td>
+                                <td className="py-2 px-4">${product.price.toFixed(2)}</td>
+                                <td className="py-2 px-4">{product.stock}</td>
+                                <td className="py-2 px-4">
+                                    <button
+                                        onClick={() => navigate(`/admin/update-product/${product._id}`)}
+                                        className="bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-600 transition"
+                                    >
+                                        Edit
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            )}
+
             {/* Pagination Controls */}
             <div className="flex justify-center mt-4 space-x-2">
                 <button
                     onClick={handlePrevPage}
                     disabled={page === 1}
-                    className={`px-4 py-2 rounded-lg ${page === 1 ? 'bg-gray-300 cursor-not-allowed' : 'bg-primary text-white hover:bg-secondary'}`}
+                    className={`px-4 py-2 rounded-lg ${
+                        page === 1 ? 'bg-gray-300 cursor-not-allowed' : 'bg-primary text-white hover:bg-secondary'
+                    }`}
                 >
                     Previous
                 </button>
@@ -94,7 +129,9 @@ const ProductsList = () => {
                 <button
                     onClick={handleNextPage}
                     disabled={page === pages}
-                    className={`px-4 py-2 rounded-lg ${page === pages ? 'bg-gray-300 cursor-not-allowed' : 'bg-primary text-white hover:bg-secondary'}`}
+                    className={`px-4 py-2 rounded-lg ${
+                        page === pages ? 'bg-gray-300 cursor-not-allowed' : 'bg-primary text-white hover:bg-secondary'
+                    }`}
                 >
                     Next
                 </button>

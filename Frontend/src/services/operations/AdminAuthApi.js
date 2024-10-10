@@ -29,7 +29,7 @@ export const Adminsignin = async (email,password) => {
         });
 
         if(response.status === 200) {
-            localStorage.setItem("token",JSON.stringify(response.data.token));
+            localStorage.setItem("token",response.data.token);
             return response.data.token;
         } else {
             throw new Error(response.data.message);
@@ -100,7 +100,6 @@ export const updatePasswordApi = async (passwordData, token) => {
             passwordData,{
                 headers: {
                     'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
                 },
             }
         );
@@ -110,7 +109,7 @@ export const updatePasswordApi = async (passwordData, token) => {
         throw error
     }
 }
-export const getProductsApi = async (page = 1, limit = 10, sortBy = 'createdAt', order = 'asc', token) => {
+export const getProductsApi = async (page = 1, limit = 10, sortBy = 'createdAt', order = 'asc', token,search='') => {
     try {
         const response = await apiConnector(
             "GET",
@@ -120,6 +119,13 @@ export const getProductsApi = async (page = 1, limit = 10, sortBy = 'createdAt',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                 },
+                params: {
+                    page,
+                    limit,
+                    sortBy,
+                    order,
+                    search,
+                }
             }
         );
         return response.data;

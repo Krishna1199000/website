@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken")
 const {z} = require("zod")
-const mognoose = require('mongoose')
+const mongoose = require('mongoose')
 const Admin = require("../models/Admin/admin");
 const Product = require('../models/Admin/Product')
 const bcrypt = require("bcrypt")
@@ -25,7 +25,7 @@ exports.AdminSignup = async(req,res) => {
             firstname: firstname,
             lastname: lastname
         })
-        if(!validatedInputs){
+        if(!validatedInputs.success){
             return res.status(404).json({message: "inncorrect inputs"})
         }
         if(await Admin.findOne({Adminname: Adminname})){
@@ -66,7 +66,7 @@ exports.AdminSignin = async(req,res) => {
         const validatedInputs = AdminSigninData.safeParse({
             Adminname, password
         })
-        if(!validatedInputs){
+        if(!validatedInputs.success){
             return res.status(411).json({message: "Incorrect inputs"})
         }
 
@@ -75,7 +75,7 @@ exports.AdminSignin = async(req,res) => {
         if(!admin){
             return res.status(411).json({message: 'admin not registered'})
         }
-        const token = await jwt.sign({admin_Id: admin._id},process.env.JWT_SECRET);
+        const token = await jwt.sign({adminId: admin._id},process.env.JWT_SECRET);
 
         res.status(200).json({token: token})
     } catch (error){
@@ -125,7 +125,7 @@ exports.addProduct = async (req, res) => {
         const product = await Product.create({
             name: validatedInputs.data.name,
             description: validatedInputs.data.description,
-            price: validatedInputs.data.price,
+            price: validatedInputs.data.price, 
             stock: validatedInputs.data.stock,
             imageUrl
         });
@@ -171,34 +171,38 @@ const updatePasswordSchema = z.object({
     newPassword: z.string().min(6, 'New password must be at least 6 characters')
 })
 
-exports.updatePassword = async (req,res ) => {
-    try{
-        const validatedInputs = updatePasswordSchema.safeParse(req.body)
+exports.updatePassword = async (req, res) => {
+    try {
+        const validatedInputs = updatePasswordSchema.safeParse(req.body);
 
-        if(!validatedInputs){
-            return res.status(411).json({message: "Error while updating information"})
+        if (!validatedInputs.success) {
+            return res.status(411).json({ message: "Error while updating information", errors: validatedInputs.error.errors });
         }
 
-        const admin = await Admin.findById(req.Admin.id);
-        if(!admin) {
-            return res.status(404).json({message: "User not found"});
+        const { oldPassword, newPassword } = validatedInputs.data;
+
+        const admin = await Admin.findById(req.adminId);
+
+        if (!admin) {
+            return res.status(404).json({ message: "User not found" });
         }
 
-        const isMatch = await bcrypt.compare(oldPassword,admin.password);
-        if(!isMatch){
-            return res.status(400).json({message: 'Invalid old password'});
+        const isMatch = await bcrypt.compare(oldPassword, admin.password);
+        if (!isMatch) {
+            return res.status(400).json({ message: 'Invalid old password' });
         }
 
-        const hashedPassword = await bcrypt.hash(newPassword,10);
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
         admin.password = hashedPassword;
 
         await admin.save();
 
-        res.status(200).json({message: 'Password updated successfully'});
+        res.status(200).json({ message: 'Password updated successfully' });
     } catch (error) {
-        res.status(500).json({message: 'Server error'});
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
-}
+};
 
 exports.getProducts = async (req, res) => {
     try {

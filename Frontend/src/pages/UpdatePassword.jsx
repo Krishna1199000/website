@@ -18,12 +18,12 @@ const UpdatePassword = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
+        console.log('Token before API call:', token); // Debugging
+    
         try {
             const response = await updatePasswordApi(form, token);
             setSuccess(response.message);
             setError(null);
-            // Optionally, reset form
             setForm({
                 oldPassword: '',
                 newPassword: '',
@@ -33,6 +33,7 @@ const UpdatePassword = () => {
             setSuccess(null);
         }
     };
+    
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
