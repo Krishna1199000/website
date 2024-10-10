@@ -129,7 +129,7 @@ const ProductsList = () => {
                 </table>
             )}
 
-            {/* Pagination Controls */}
+        
             <div className="flex justify-center mt-4 space-x-2">
                 <button
                     onClick={handlePrevPage}
