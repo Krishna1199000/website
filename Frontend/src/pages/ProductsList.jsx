@@ -12,18 +12,18 @@ const ProductsList = () => {
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
     const [pages, setPages] = useState(1);
-    const [search,setSearch] = useState('');
-    const [searchTerm,setSearchTerm] = useState('');
+    const [search, setSearch] = useState('');
+    const [searchTerm, setSearchTerm] = useState('');
 
-    useEffect(()=>{
-        const handler = setTimeout(()=> {
+    useEffect(() => {
+        const handler = setTimeout(() => {
             setSearchTerm(search);
             setPage(1);
-        },500)
+        }, 500);
         return () => {
             clearTimeout(handler);
-        }
-    },[search]);
+        };
+    }, [search]);
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -43,7 +43,7 @@ const ProductsList = () => {
         };
 
         fetchProducts();
-    }, [page, token,searchTerm]);
+    }, [page, token, searchTerm]);
 
     const handleNextPage = () => {
         if (page < pages) setPage(page + 1);
@@ -65,6 +65,11 @@ const ProductsList = () => {
         return <div className="text-red-500 text-center mt-10">{error}</div>;
     }
 
+    // Filter products based on search term
+    const filteredProducts = products.filter(product =>
+        product.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     return (
         <div className="container mx-auto p-4">
             <h2 className="text-2xl font-bold mb-4">Products List</h2>
@@ -80,12 +85,13 @@ const ProductsList = () => {
                 />
             </div>
 
-            {products.length === 0 ? (
+            {filteredProducts.length === 0 ? (
                 <div className="text-center">No products found.</div>
             ) : (
                 <table className="w-full bg-white shadow-md rounded-lg overflow-hidden">
                     <thead>
                         <tr className="bg-gray-200 text-left">
+                            <th className="py-2 px-4">Image</th>
                             <th className="py-2 px-4">Name</th>
                             <th className="py-2 px-4">Price</th>
                             <th className="py-2 px-4">Stock</th>
@@ -93,10 +99,21 @@ const ProductsList = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {products.map(product => (
+                        {filteredProducts.map(product => (
                             <tr key={product._id} className="border-t">
+                                <td className="py-2 px-4">
+                                    {product.imageUrl ? (
+                                        <img
+                                            src={product.imageUrl}
+                                            alt={product.name}
+                                            className="h-20 w-20 object-cover rounded"
+                                        />
+                                    ) : (
+                                        <div className="h-20 w-20 bg-gray-200 flex items-center justify-center rounded">No Image</div>
+                                    )}
+                                </td>
                                 <td className="py-2 px-4">{product.name}</td>
-                                <td className="py-2 px-4">${product.price.toFixed(2)}</td>
+                                <td className="py-2 px-4">₹{product.price.toFixed(2)}</td>
                                 <td className="py-2 px-4">{product.stock}</td>
                                 <td className="py-2 px-4">
                                     <button

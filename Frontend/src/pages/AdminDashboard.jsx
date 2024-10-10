@@ -32,13 +32,7 @@ const AdminDashboard = () => {
                     <h2 className="text-xl font-semibold mb-2">Add Product</h2>
                     <p>Add new products to the inventory.</p>
                 </div>
-                <div
-                    onClick={() => navigate('/admin/update-product')}
-                    className="bg-white p-6 rounded-lg shadow-lg cursor-pointer hover:bg-gray-50 transition"
-                >
-                    <h2 className="text-xl font-semibold mb-2">Update Product</h2>
-                    <p>Edit existing products.</p>
-                </div>
+                
                 <div
                     onClick={() => navigate('/admin/update-password')}
                     className="bg-white p-6 rounded-lg shadow-lg cursor-pointer hover:bg-gray-50 transition"

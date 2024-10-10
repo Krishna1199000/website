@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { updateProductApi, getProductApi } from '../services/operations/AdminAuthApi';
+import { updateProductApi, getProductApi } from '../services/operations/AdminAuthApi'; // Ensure to import necessary API calls
 import { useRecoilValue } from 'recoil';
 import { AdmintokenAtom } from '../stores/Adminatoms';
 
-
 const UpdateProduct = () => {
     const navigate = useNavigate();
-    const { productId } = useParams();
     const token = useRecoilValue(AdmintokenAtom);
+    const { productId } = useParams(); // Assuming you're passing product ID in the URL
     const [form, setForm] = useState({
         name: '',
         description: '',
@@ -16,29 +15,23 @@ const UpdateProduct = () => {
         stock: '',
         image: null,
     });
+
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [product, setProduct] = useState(null);
 
     useEffect(() => {
-        // Fetch existing product details to prefill the form
         const fetchProduct = async () => {
             try {
-                const response = await getProductApi(productId, token);
-                const fetchedProduct = response.product; // Adjust based on actual API response
-                setProduct(fetchedProduct);
+                const product = await getProductApi(productId, token);
                 setForm({
-                    name: fetchedProduct.name,
-                    description: fetchedProduct.description,
-                    price: fetchedProduct.price,
-                    stock: fetchedProduct.stock,
-                    image: null, // Image will be replaced if a new one is uploaded
+                    name: product.name,
+                    description: product.description,
+                    price: product.price,
+                    stock: product.stock,
+                    image: null, // Reset image here
                 });
-                setLoading(false);
             } catch (err) {
-                setError(err.message || 'Failed to fetch product details');
-                setLoading(false);
+                setError(err.message);
             }
         };
 
@@ -67,20 +60,14 @@ const UpdateProduct = () => {
         }
 
         try {
-            const response = await updateProductApi(productId, productData, token);
+            const response = await updateProductApi(productId, productData, token); // Ensure to use appropriate API function
             setSuccess(response.message);
-            setError(null);
-            // Optionally, navigate to products list or another page
             navigate('/admin/dashboard');
         } catch (err) {
-            setError(err.message || 'Failed to update product');
+            setError(err.message);
             setSuccess(null);
         }
     };
-
-    if (loading) {
-        return <div className="text-center mt-10">Loading...</div>;
-    }
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
@@ -128,11 +115,6 @@ const UpdateProduct = () => {
                         min="0"
                         step="1"
                     />
-                    {product.imageUrl && (
-                        <div className="mb-4">
-                            <img src={product.imageUrl} alt={product.name} className="w-32 h-32 object-cover rounded-lg" />
-                        </div>
-                    )}
                     <input
                         type="file"
                         name="image"
