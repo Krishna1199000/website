@@ -9,7 +9,7 @@ const path = require('path')
 
 
 const corsOptions = {
-    origin: 'https://website-theta-lovat-75.vercel.app', 
+    origin: 'https://website-wvj9.vercel.app', 
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     
     credentials: true, 
