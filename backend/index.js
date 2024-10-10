@@ -9,17 +9,17 @@ const path = require('path')
 
 
 const corsOptions = {
-    origin: 'http://localhost:5173', // Replace with your frontend's origin
+    origin: 'https://website-theta-lovat-75.vercel.app', 
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     
-    credentials: true, // If you need to send cookies or other credentials
+    credentials: true, 
 };
 
 app.use(cors(corsOptions));
 
 
 app.use(bodyParser.json());
-app.use('/uploads',express.static(path.join(__dirname,'uploads')))
+
 require("dotenv").config();
 
 const dbConnect = require("./config/db")
