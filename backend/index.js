@@ -9,7 +9,7 @@ const path = require('path')
 
 
 const corsOptions = {
-    origin: 'https://website-wvj9.vercel.app', 
+    origin: 'http://localhost:5173', 
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     
     credentials: true, 

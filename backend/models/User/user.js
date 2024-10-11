@@ -17,7 +17,15 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
         minLength: 6,
-    }
+    },
+    balance : {
+        type: Number,
+        default: 0,
+    },
+    purchases: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Product',
+    }],
 })
 
 module.exports = mongoose.model("User",userSchema);
