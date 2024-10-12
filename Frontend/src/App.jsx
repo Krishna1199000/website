@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { RecoilRoot, useRecoilValue } from 'recoil';
@@ -12,24 +11,33 @@ import UpdatePassword from './pages/UpdatePassword';
 import ProductsList from './pages/ProductsList';
 import UserSignup from './pages/UserSignup';
 import UserSignin from './pages/UserSignin';
+import UserDashboard from './pages/UserDashboard';
+import AddMoney from './pages/AddMoney';
+import UpdateUserPassword from './pages/UpdateUserPassword';
+import UserPurchases from './pages/UserPurchases';
+
 import { AdmintokenAtom } from './stores/Adminatoms';
+import { UsertokenAtom } from './stores/Useratoms';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-
+// PrivateRoute for Admin
 const PrivateRoute = ({ children }) => {
     const token = useRecoilValue(AdmintokenAtom);
     return token ? children : <Navigate to="/admin-signin" />;
 };
 
-// Optional: PrivateRoute for user routes
-// const UserPrivateRoute = ({ children }) => {
-//     const token = useRecoilValue(UsertokenAtom); // Define UsertokenAtom similarly
-//     return token ? children : <Navigate to="/user-signin" />;
-// };
+// PrivateRoute for User
+const UserPrivateRoute = ({ children }) => {
+    const token = useRecoilValue(UsertokenAtom);
+    return token ? children : <Navigate to="/user-signin" />;
+};
 
 function App() {
     return (
         <RecoilRoot>
             <Router>
+                <ToastContainer />
                 <Routes>
                     {/* Home Route */}
                     <Route path="/" element={<Home />} />
@@ -37,21 +45,44 @@ function App() {
                     {/* User Routes */}
                     <Route path="/user-signup" element={<UserSignup />} />
                     <Route path="/user-signin" element={<UserSignin />} />
+                    
                     {/* Protected User Routes */}
-                    {/* <Route
+                    <Route
                         path="/user/dashboard"
                         element={
                             <UserPrivateRoute>
                                 <UserDashboard />
                             </UserPrivateRoute>
                         }
-                    /> */}
+                    />
+                     <Route
+                        path="/user/add-money"
+                        element={
+                            <UserPrivateRoute>
+                                <AddMoney />
+                            </UserPrivateRoute>
+                        }
+                    />
+                     <Route
+                        path="/user/purchases"
+                        element={
+                            <UserPrivateRoute>
+                                <UserPurchases />
+                            </UserPrivateRoute>
+                        }
+                    />
+                     <Route
+                        path="/user/updateCredentials"
+                        element={
+                            <UserPrivateRoute>
+                                <UpdateUserPassword />
+                            </UserPrivateRoute>
+                        }
+                    />
 
-                    
+                    {/* Admin Routes */}
                     <Route path="/admin-signup" element={<AdminSignup />} />
                     <Route path="/admin-signin" element={<AdminSignin />} />
-
-                    
                     <Route
                         path="/admin/dashboard"
                         element={
@@ -93,7 +124,7 @@ function App() {
                         }
                     />
 
-                    
+                    {/* Fallback Route */}
                     <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
             </Router>

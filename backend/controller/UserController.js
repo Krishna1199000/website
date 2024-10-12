@@ -122,39 +122,52 @@ exports.updatePassword = async (req,res) => {
     }
 }
 
-const addMoneySchema = z.object ({
+
+
+const addMoneySchema = z.object({
     amount: z.number().positive('Amount must be a positive number')
-})
+});
 
-exports.addMoney = async (req,res) => {
-    try{
-    const {amount} = req.body;
+exports.addMoney = async (req, res) => {
+    try {
+        console.log('Add Money Request Body:', req.body);
+        console.log('User ID:', req.userId);
 
-    const validatedInputs = addMoneySchema.safeParse({amount});
+        const { amount } = req.body;
 
-    if(!validatedInputs.success) {
-        return res.status(411).json({message: "Error while logging in"})
-    }  
+        const validatedInputs = addMoneySchema.safeParse({ amount });
 
-    const user = await User.findById(req.userId);
-    user.balance += amount;
-    await user.save();
+        if (!validatedInputs.success) {
+            console.log('Validation errors:', validatedInputs.error.errors);
+            return res.status(400).json({ message: validatedInputs.error.errors[0].message });
+        }
 
+        const user = await User.findById(req.userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
 
-    const transaction = new Transaction({
-        user: user._id,
-        type: 'credit',
-        amount,
-        description: 'Added money to account',
-    });
+        user.balance += amount;
+        await user.save();
 
-    await transaction.save();
-    res.json({balance:user.balance,transaction});
+        const transaction = new Transaction({
+            user: user._id,
+            type: 'credit',
+            amount,
+            description: 'Added money to account',
+        });
+
+        console.log("Transaction to be saved:", transaction);
+        await transaction.save();
+
+        res.json({ balance: user.balance, transaction });
     } catch (error) {
-        console.error(error.message);
-        res.status(500).send('Server error')
+        console.error("Server error:", error.message);
+        res.status(500).send('Server error');
     }
-}
+};
+
+
 const purchaseSchema = z.object({
     productId: z.string().length(24, "Invalid product ID length"),
 })
@@ -176,7 +189,7 @@ exports.purchaseProduct = async (req, res) => {
         const product = await Product.findById(productId);
         if (!product) {
             return res.status(404).json({ msg: 'Product not found' });
-        }
+         }
 
         if (user.balance < product.price) {
             return res.status(400).json({ msg: 'Insufficient balance' });
