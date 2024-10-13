@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { useRecoilValue } from 'recoil';
 import { UsertokenAtom } from '../stores/Useratoms';
 import { toast } from 'react-toastify';
-import { fetchProducts, buyProduct, searchProducts } from '../services/operations/UserAuthApi'; 
+import { fetchProducts, buyProduct, searchProducts } from '../services/operations/UserAuthApi';
 
 const Container = styled.div`
     padding: 20px;
@@ -66,27 +66,28 @@ const UserDashboard = () => {
         }
     };
 
-    // Buy product using the service function
     const handleBuy = async (productId) => {
         try {
             await buyProduct(productId, token);
             toast.success('Product purchased successfully!');
-            // Optionally, update purchase history or product availability
         } catch (error) {
+            console.error("Purchase error:", error.response ? error.response.data : error.message);
             toast.error('Failed to purchase product.');
         }
     };
 
-    // Search products using the service function
+
     const handleSearch = async (e) => {
         e.preventDefault();
         try {
-            const data = await searchProducts(searchQuery);
+            const data = await searchProducts(searchQuery, token); // Pass token
             setProducts(data);
         } catch (error) {
-            toast.error('Search failed.');
+            console.error("Search error:", error.response ? error.response.data : error.message);
+            toast.error(error.response?.data?.message || 'Search failed.');
         }
     };
+    
 
     return (
         <>
@@ -102,14 +103,25 @@ const UserDashboard = () => {
                     />
                 </form>
                 <ProductsGrid>
-                    {products.map((product) => (
-                        <ProductCard key={product.id}>
-                            <img src={product.image} alt={product.name} style={{ width: '100%', height: '150px', objectFit: 'cover' }} />
+                {products.map((product) => (
+                        <ProductCard key={product._id}> {/* Changed from product.id to product._id */}
+                            <img src={product.imageUrl} alt={product.name} style={{ width: '100%', height: '150px', objectFit: 'cover' }} />
                             <h3>{product.name}</h3>
                             <p>₹{product.price}</p>
-                            <BuyButton onClick={() => handleBuy(product.id)}>Buy Now</BuyButton>
+                            <p>Stock: {product.stock}</p>
+                            <BuyButton 
+                                onClick={() => handleBuy(product._id)} // Changed from product.id to product._id
+                                disabled={product.stock < 1} // Disable button if out of stock
+                                style={{ 
+                                    opacity: product.stock < 1 ? 0.5 : 1, 
+                                    cursor: product.stock < 1 ? 'not-allowed' : 'pointer' 
+                                }}
+                            >
+                                {product.stock < 1 ? 'Out of Stock' : 'Buy Now'}
+                            </BuyButton>
                         </ProductCard>
                     ))}
+
                 </ProductsGrid>
             </Container>
         </>

@@ -215,7 +215,7 @@ exports.getProducts = async (req, res) => {
         const skip = (page - 1) * limit;
         const sortOrder = { [sortBy]: order };
 
-        // Build search query if search parameter is provided
+        
         const query = search
             ? {
                 $or: [
@@ -247,7 +247,6 @@ exports.getProducts = async (req, res) => {
     }
 };
 
-// Get single product by ID
 exports.getProductById = async (req, res) => {
     try {
         const { productId } = req.params;

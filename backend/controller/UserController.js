@@ -234,22 +234,24 @@ const SearchProductSchema = z.object({
     query: z.string().min(1,"Search query cannot be empty"),
 })
 
-exports.searchProducts = async (req,res) => {
-    
-    try{
-        const {query} = req.body;
 
-        const validatedInputs = SearchProductSchema.safeParse({query});
-        if(!validatedInputs.success){
-            return res.status(411).json({message: "Error while logging in"})
+exports.searchProducts = async (req, res) => {
+    try {
+        const { query } = req.body; // For POST request
+        // const { query } = req.query; // For GET request
+
+        const validatedInputs = SearchProductSchema.safeParse({ query });
+        if (!validatedInputs.success) {
+            const errorMsg = validatedInputs.error.errors.map(err => err.message).join(', ');
+            return res.status(400).json({ message: errorMsg }); // Fixed message
         }
 
-        const regex = newRegExp(query,'i');
+        const regex = new RegExp(query, 'i'); // Fixed typo
         const products = await Product.find({
-            $or:[
-                {name: regex},
-                {category: regex},
-                {description: regex},
+            $or: [
+                { name: regex },
+                { category: regex },
+                { description: regex },
             ],
         });
         res.json(products);
@@ -260,12 +262,32 @@ exports.searchProducts = async (req,res) => {
 };
 
 
-exports.getUserPurchases = async(req,res) => {
-    try{
-        const user = await User.findById(req.user.id).populate('purchases');
+exports.getUserPurchases = async (req, res) => {
+    try {
+        const user = await User.findById(req.userId).populate('purchases');
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found' });
+        }
+        if (!user.purchases || user.purchases.length === 0) {
+            return res.status(200).json({ msg: 'No purchases found', purchases: [] });
+        }
         res.json(user.purchases);
     } catch (error) {
-        console.error(error.message);
+        console.error('Error fetching purchases:', error.message);
         res.status(500).send('Server error');
+    }
+};
+
+
+exports.getBalance = async (req,res) => {
+    try{
+        const user = await User.findById(req.userId).select('balance');
+        if(!user){
+            return res.status(404).json({message: "User not found"});
+        }
+        res.json({balance: user.balance});
+    } catch(error){
+        console.error(error);
+        res.status(500).json({message: "Server errror"})
     }
 }

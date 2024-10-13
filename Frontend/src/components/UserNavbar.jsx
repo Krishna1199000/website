@@ -1,3 +1,5 @@
+
+
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaBars } from 'react-icons/fa';
@@ -5,7 +7,8 @@ import { useSetRecoilState } from 'recoil';
 import { UsertokenAtom } from '../stores/Useratoms';
 import styled from 'styled-components';
 
-// Styled Components
+
+
 const Nav = styled.nav`
     background: #333;
     height: 60px;
@@ -32,6 +35,7 @@ const Hamburger = styled(FaBars)`
     }
 `;
 
+
 const Menu = styled.ul`
     list-style: none;
     display: flex;
@@ -45,7 +49,7 @@ const Menu = styled.ul`
         left: 0;
         width: 100%;
         padding: 20px 0;
-        display: ${({ isOpen }) => (isOpen ? 'flex' : 'none')};
+        display: ${({ $isOpen }) => ($isOpen ? 'flex' : 'none')};
     }
 `;
 
@@ -82,7 +86,8 @@ const UserNavbar = () => {
         <Nav>
             <NavLogo to="/user/dashboard">jay Hinglaj Tailor</NavLogo>
             <Hamburger size={24} onClick={() => setIsOpen(!isOpen)} />
-            <Menu isOpen={isOpen}>
+            
+            <Menu $isOpen={isOpen}>
                 <MenuItem>
                     <Link to="/user/dashboard">Home</Link>
                 </MenuItem>

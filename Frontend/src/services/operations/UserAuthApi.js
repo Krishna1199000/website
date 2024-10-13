@@ -63,26 +63,7 @@ export const addMoney = async (amount, token) => {
     }
 };
 
-// Add Product Function
-export const addProduct = async (productData, token) => {
-    try {
-        const response = await apiConnector(
-            "POST",
-            `${BASE_URL}/user/add-product`,
-            productData,
-            { headers: { Authorization: `Bearer ${token}` } }
-        );
 
-        if (response.status === 200) {
-            return response.data; // Return response data
-        } else {
-            throw new Error(response.data.message);
-        }
-    } catch (error) {
-        console.log("Add product error...", error.message);
-        throw error; // Re-throw for component handling
-    }
-};
 
 // Fetch User Purchases Function
 export const fetchUserPurchases = async (token) => {
@@ -137,36 +118,45 @@ export const fetchProducts = async () => {
         }
     } catch (error) {
         console.error("Error fetching products...", error.message);
-        throw error; // Re-throw for component handling
+        throw error; 
     }
 };
 
-// Buy Product Function
+
 export const buyProduct = async (productId, token) => {
     try {
         const response = await apiConnector(
             "POST",
-            `${BASE_URL}/user/purchase`,
+            `${BASE_URL}/user/purchase`, // Corrected endpoint
             { productId },
             { headers: { Authorization: `Bearer ${token}` } }
         );
 
         if (response.status === 200) {
-            return response.data.message; // Return success message
+            return response.data; // Return the entire response data
         } else {
-            throw new Error(response.data.message);
+            throw new Error(response.data.message || 'Failed to purchase product.');
         }
     } catch (error) {
-        console.error("Error purchasing product...", error.message);
-        throw error; // Re-throw for component handling
+        if (error.response) {
+            // Server responded with a status other than 2xx
+            console.error("Error purchasing product:", error.response.data);
+            throw new Error(error.response.data.msg || error.response.data.message || 'Purchase failed.');
+        } else if (error.request) {
+            // Request was made but no response received
+            console.error("No response received:", error.request);
+            throw new Error('No response from server.');
+        } else {
+            // Something else happened
+            console.error("Error:", error.message);
+            throw new Error('An unexpected error occurred.');
+        }
     }
 };
-
-// Search Products Function
-export const searchProducts = async (query) => {
+export const searchProducts = async (query, token) => {
     try {
-        const response = await apiConnector("GET", `${BASE_URL}/user/searchProducts`, null, {
-            params: { query }
+        const response = await apiConnector("POST", `${BASE_URL}/user/search`, { query }, {
+            headers: { Authorization: `Bearer ${token}` },
         });
 
         if (response.status === 200) {
@@ -175,7 +165,28 @@ export const searchProducts = async (query) => {
             throw new Error(response.data.message);
         }
     } catch (error) {
-        console.error("Error searching products...", error.message);
-        throw error; // Re-throw for component handling
+        console.error("Error searching products...", error.response?.data || error.message);
+        throw error;
     }
 };
+
+
+export const getBalance = async(token) => {
+    try{
+        const response = await apiConnector(
+            "GET",
+            `${BASE_URL}/user/balance`,
+            null,
+            {headers: {Authorization: `Bearer ${token}`}}
+        );
+
+        if(response.status===200){
+            return response.data.balance;
+        } else{
+            throw new Error(response.data.message);
+        }
+    } catch (error){
+        console.error("Error fetching balance...", error.message);
+        throw error;
+    }
+}

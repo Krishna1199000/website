@@ -53,7 +53,7 @@ const UserPurchases = () => {
                         {purchases.map((purchase) => (
                             <PurchaseItem key={purchase.id}>
                                 <h3>{purchase.productName}</h3>
-                                <p>Price: ${purchase.price}</p>
+                                <p>Price: ₹{purchase.price}</p>
                                 <p>Date: {new Date(purchase.date).toLocaleDateString()}</p>
                             </PurchaseItem>
                         ))}

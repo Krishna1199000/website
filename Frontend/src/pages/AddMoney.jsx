@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import UserNavbar from '../components/UserNavbar';
 import styled from 'styled-components';
 import { useRecoilValue } from 'recoil';
 import { UsertokenAtom } from '../stores/Useratoms';
 import { toast } from 'react-toastify';
-import { addMoney } from '../services/operations/userauthapi'; // Ensure correct path and casing
+import { addMoney, getBalance } from '../services/operations/UserAuthApi'; // Ensure correct path and casing
 
 const Container = styled.div`
     padding: 20px;
@@ -37,28 +37,55 @@ const Button = styled.button`
     }
 `;
 
+const BalanceText = styled.div`
+    margin-bottom: 20px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+`;
+
 const AddMoney = () => {
     const token = useRecoilValue(UsertokenAtom);
     const [amount, setAmount] = useState('');
+    const [balance, setBalance] = useState(null); 
+
+    
+    useEffect(() => {
+        const fetchBalance = async () => {
+            try {
+                const fetchedBalance = await getBalance(token); 
+                setBalance(fetchedBalance); 
+            } catch (error) {
+                console.error('Error fetching balance:', error);
+                toast.error('Failed to fetch balance.');
+            }
+        };
+
+        fetchBalance();
+    }, [token]);
 
     const handleSubmit = async (e) => {
-        e.preventDefault(); // Prevent default form submission
+        e.preventDefault();
 
-        const numericAmount = parseFloat(amount); // Convert to number
+        const numericAmount = parseFloat(amount);
 
-        console.log('Submitting amount:', numericAmount); // Log amount before submission
         if (isNaN(numericAmount) || numericAmount <= 0) {
             toast.error('Please enter a valid amount.');
             return;
         }
-        try {
-            const response = await addMoney(numericAmount, token); // Call the addMoney function
 
-            console.log('Response from server:', response); // Log server response
+        try {
+            await addMoney(numericAmount, token); 
+
             toast.success('Money added successfully!');
-            setAmount(''); // Reset amount input
+            setAmount('');
+
+            
+            const updatedBalance = await getBalance(token);
+            setBalance(updatedBalance);
+
         } catch (error) {
-            console.error('Error occurred during API call:', error); // Log error details
+            console.error('Error occurred during API call:', error);
             if (error.response && error.response.data && error.response.data.message) {
                 toast.error(`Failed to add money: ${error.response.data.message}`);
             } else {
@@ -72,6 +99,9 @@ const AddMoney = () => {
             <UserNavbar />
             <Container>
                 <h2>Add Money</h2>
+                {balance !== null && (
+                    <BalanceText>Current Balance: ₹{balance}</BalanceText>
+                )}
                 <Form onSubmit={handleSubmit}>
                     <Input
                         type="number"
