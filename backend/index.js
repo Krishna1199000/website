@@ -9,7 +9,7 @@ const path = require('path')
 
 
 const corsOptions = {
-    origin: 'https://website-kappa-woad.vercel.app', 
+    origin: '', 
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     
     credentials: true, 
