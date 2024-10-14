@@ -28,10 +28,9 @@ dbConnect();
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/admin",adminRoutes);
 
-app.get("/",(req,res)=>{
-    console.error(err.stack);
-    res.status(500).json({message: "Something went wrong",error: err.message})
-})
+app.get("/", (req, res) => {
+    res.send("Welcome to the API!");
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, ()=> {
