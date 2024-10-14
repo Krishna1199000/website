@@ -9,7 +9,7 @@ const path = require('path')
 
 
 const corsOptions = {
-    origin: '', 
+    origin: 'https://website-frontend-9gcc.onrender.com', 
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     
     credentials: true, 
