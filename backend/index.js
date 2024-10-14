@@ -9,7 +9,7 @@ const path = require('path')
 
 
 const corsOptions = {
-    origin: 'http://localhost:5173', 
+    origin: 'https://lighthearted-pie-08b47b.netlify.app', 
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     
     credentials: true, 
