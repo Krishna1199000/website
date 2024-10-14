@@ -56,7 +56,7 @@ const UserDashboard = () => {
         handleFetchProducts();
     }, []);
 
-    // Fetch products using the service function
+    
     const handleFetchProducts = async () => {
         try {
             const data = await fetchProducts();
@@ -104,14 +104,14 @@ const UserDashboard = () => {
                 </form>
                 <ProductsGrid>
                 {products.map((product) => (
-                        <ProductCard key={product._id}> {/* Changed from product.id to product._id */}
+                        <ProductCard key={product._id}> 
                             <img src={product.imageUrl} alt={product.name} style={{ width: '100%', height: '150px', objectFit: 'cover' }} />
                             <h3>{product.name}</h3>
                             <p>₹{product.price}</p>
                             <p>Stock: {product.stock}</p>
                             <BuyButton 
-                                onClick={() => handleBuy(product._id)} // Changed from product.id to product._id
-                                disabled={product.stock < 1} // Disable button if out of stock
+                                onClick={() => handleBuy(product._id)} 
+                                disabled={product.stock < 1} 
                                 style={{ 
                                     opacity: product.stock < 1 ? 0.5 : 1, 
                                     cursor: product.stock < 1 ? 'not-allowed' : 'pointer' 

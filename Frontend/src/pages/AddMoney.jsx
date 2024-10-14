@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { useRecoilValue } from 'recoil';
 import { UsertokenAtom } from '../stores/Useratoms';
 import { toast } from 'react-toastify';
-import { addMoney, getBalance } from '../services/operations/UserAuthApi'; // Ensure correct path and casing
+import { addMoney, getBalance } from '../services/operations/UserAuthApi'; 
 
 const Container = styled.div`
     padding: 20px;

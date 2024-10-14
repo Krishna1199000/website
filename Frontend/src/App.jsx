@@ -21,13 +21,13 @@ import { UsertokenAtom } from './stores/Useratoms';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-// PrivateRoute for Admin
+
 const PrivateRoute = ({ children }) => {
     const token = useRecoilValue(AdmintokenAtom);
     return token ? children : <Navigate to="/admin-signin" />;
 };
 
-// PrivateRoute for User
+
 const UserPrivateRoute = ({ children }) => {
     const token = useRecoilValue(UsertokenAtom);
     return token ? children : <Navigate to="/user-signin" />;
@@ -39,14 +39,14 @@ function App() {
             <Router>
                 <ToastContainer />
                 <Routes>
-                    {/* Home Route */}
+                   
                     <Route path="/" element={<Home />} />
 
-                    {/* User Routes */}
+                    
                     <Route path="/user-signup" element={<UserSignup />} />
                     <Route path="/user-signin" element={<UserSignin />} />
                     
-                    {/* Protected User Routes */}
+                    
                     <Route
                         path="/user/dashboard"
                         element={
@@ -80,7 +80,7 @@ function App() {
                         }
                     />
 
-                    {/* Admin Routes */}
+                    
                     <Route path="/admin-signup" element={<AdminSignup />} />
                     <Route path="/admin-signin" element={<AdminSignin />} />
                     <Route
@@ -124,7 +124,6 @@ function App() {
                         }
                     />
 
-                    {/* Fallback Route */}
                     <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
             </Router>

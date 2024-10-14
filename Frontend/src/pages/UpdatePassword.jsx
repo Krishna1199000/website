@@ -18,7 +18,7 @@ const UpdatePassword = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log('Token before API call:', token); // Debugging
+        console.log('Token before API call:', token); 
     
         try {
             const response = await updatePasswordApi(form, token);

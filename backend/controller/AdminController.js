@@ -96,32 +96,32 @@ const addProductData = z.object({
 })
 exports.addProduct = async (req, res) => {
     try {
-        // Destructure required fields from req.body
+        
         const { name, description, price, stock } = req.body;
 
-        // Validate and parse inputs using Zod
+        
         const validatedInputs = addProductData.safeParse({
             name,
             description,
-            price: parseFloat(price),    // Convert to number
-            stock: parseInt(stock, 10)   // Convert to integer
+            price: parseFloat(price),   
+            stock: parseInt(stock, 10)   
         });
 
         if (!validatedInputs.success) {
-            // Return detailed validation errors
+           
             return res.status(400).json({ 
                 message: "Error while adding information", 
                 errors: validatedInputs.error.errors 
             });
         }
 
-        // Handle the uploaded image
+       
         let imageUrl = null;
         if (req.file) {
             imageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
         }
 
-        // Create the product in the database
+        
         const product = await Product.create({
             name: validatedInputs.data.name,
             description: validatedInputs.data.description,
@@ -251,7 +251,7 @@ exports.getProductById = async (req, res) => {
     try {
         const { productId } = req.params;
 
-        // Validate productId
+       
         if (!mongoose.Types.ObjectId.isValid(productId)) {
             return res.status(400).json({ success: false, message: 'Invalid Product ID' });
         }

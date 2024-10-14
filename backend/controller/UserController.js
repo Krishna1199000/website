@@ -237,16 +237,16 @@ const SearchProductSchema = z.object({
 
 exports.searchProducts = async (req, res) => {
     try {
-        const { query } = req.body; // For POST request
-        // const { query } = req.query; // For GET request
+        const { query } = req.body; 
+        
 
         const validatedInputs = SearchProductSchema.safeParse({ query });
         if (!validatedInputs.success) {
             const errorMsg = validatedInputs.error.errors.map(err => err.message).join(', ');
-            return res.status(400).json({ message: errorMsg }); // Fixed message
+            return res.status(400).json({ message: errorMsg }); 
         }
 
-        const regex = new RegExp(query, 'i'); // Fixed typo
+        const regex = new RegExp(query, 'i'); 
         const products = await Product.find({
             $or: [
                 { name: regex },

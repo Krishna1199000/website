@@ -1,7 +1,7 @@
-import { apiConnector } from "../apiConnector"; // Ensure correct path
+import { apiConnector } from "../apiConnector"; 
 const BASE_URL = import.meta.env.VITE_BASE_URL_USER;
 
-// User Signup Function
+
 export const Usersignup = async (firstname, lastname, email, password) => {
     try {
         const response = await apiConnector("POST", `${BASE_URL}/user/UserSignup`, {
@@ -18,11 +18,11 @@ export const Usersignup = async (firstname, lastname, email, password) => {
         }
     } catch (error) {
         console.log("UserSignup error...", error.message);
-        throw error; // Re-throw for component handling
+        throw error; 
     }
 };
 
-// User Signin Function
+
 export const Usersignin = async (email, password) => {
     try {
         const response = await apiConnector("POST", `${BASE_URL}/user/UserSignin`, {
@@ -38,11 +38,11 @@ export const Usersignin = async (email, password) => {
         }
     } catch (error) {
         console.log("Login error...", error.message);
-        throw error; // Re-throw for component handling
+        throw error;
     }
 };
 
-// Add Money Function
+
 export const addMoney = async (amount, token) => {
     try {
         const response = await apiConnector(
@@ -53,40 +53,39 @@ export const addMoney = async (amount, token) => {
         );
 
         if (response.status === 200) {
-            return response.data; // Return response data
+            return response.data; 
         } else {
             throw new Error(response.data.message);
         }
     } catch (error) {
         console.log("Add money error...", error.message);
-        throw error; // Re-throw for component handling
+        throw error; 
     }
 };
 
 
 
-// Fetch User Purchases Function
+
 export const fetchUserPurchases = async (token) => {
     try {
         const response = await apiConnector(
             "GET",
             `${BASE_URL}/user/purchases`,
-            null, // No body for GET request
+            null, 
             { headers: { Authorization: `Bearer ${token}` } }
         );
 
         if (response.status === 200) {
-            return response.data; // Return purchase data
+            return response.data;
         } else {
             throw new Error(response.data.message);
         }
     } catch (error) {
         console.error("Error fetching purchases...", error.message);
-        throw error; // Re-throw for component handling
+        throw error; 
     }
 };
 
-// Update User Password Function
 export const updateUserPassword = async (currentPassword, newPassword, token) => {
     try {
         const response = await apiConnector(
@@ -97,22 +96,22 @@ export const updateUserPassword = async (currentPassword, newPassword, token) =>
         );
 
         if (response.status === 200) {
-            return response.data.message; // Return success message
+            return response.data.message; 
         } else {
             throw new Error(response.data.message);
         }
     } catch (error) {
         console.log("Update password error...", error.message);
-        throw error; // Re-throw for component handling
+        throw error; 
     }
 };
 
-// Fetch Products Function
+
 export const fetchProducts = async () => {
     try {
         const response = await apiConnector("GET", `${BASE_URL}/user/products`);
         if (response.status === 200) {
-            return response.data; // Return products data
+            return response.data; 
         } else {
             throw new Error(response.data.message);
         }
@@ -127,27 +126,27 @@ export const buyProduct = async (productId, token) => {
     try {
         const response = await apiConnector(
             "POST",
-            `${BASE_URL}/user/purchase`, // Corrected endpoint
+            `${BASE_URL}/user/purchase`, 
             { productId },
             { headers: { Authorization: `Bearer ${token}` } }
         );
 
         if (response.status === 200) {
-            return response.data; // Return the entire response data
+            return response.data; 
         } else {
             throw new Error(response.data.message || 'Failed to purchase product.');
         }
     } catch (error) {
         if (error.response) {
-            // Server responded with a status other than 2xx
+           
             console.error("Error purchasing product:", error.response.data);
             throw new Error(error.response.data.msg || error.response.data.message || 'Purchase failed.');
         } else if (error.request) {
-            // Request was made but no response received
+           
             console.error("No response received:", error.request);
             throw new Error('No response from server.');
         } else {
-            // Something else happened
+            
             console.error("Error:", error.message);
             throw new Error('An unexpected error occurred.');
         }
@@ -160,7 +159,7 @@ export const searchProducts = async (query, token) => {
         });
 
         if (response.status === 200) {
-            return response.data; // Return search results
+            return response.data; 
         } else {
             throw new Error(response.data.message);
         }

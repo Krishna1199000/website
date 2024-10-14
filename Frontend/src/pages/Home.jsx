@@ -1,7 +1,7 @@
-// src/components/Home.js
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import backgroundImage from '../assets/hero-bg.jpg'; // You'll need to add this image
+import backgroundImage from '../assets/hero-bg.jpg'; 
 
 const Home = () => {
   const navigate = useNavigate();
@@ -19,7 +19,7 @@ const Home = () => {
           Seamlessly connect with us. Sign up or sign in to get started.
         </p>
         <div className="flex flex-col md:flex-row justify-center gap-4">
-          {/* User Buttons */}
+
           <div className="flex flex-col items-center">
             <button
               onClick={() => navigate('/user-signup')}
@@ -35,7 +35,7 @@ const Home = () => {
             </button>
           </div>
 
-          {/* Admin Buttons */}
+         
           <div className="flex flex-col items-center">
             <button
               onClick={() => navigate('/admin-signup')}

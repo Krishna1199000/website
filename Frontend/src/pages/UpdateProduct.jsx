@@ -7,7 +7,7 @@ import { AdmintokenAtom } from '../stores/Adminatoms';
 const UpdateProduct = () => {
     const navigate = useNavigate();
     const token = useRecoilValue(AdmintokenAtom);
-    const { productId } = useParams(); // Assuming you're passing product ID in the URL
+    const { productId } = useParams(); 
     const [form, setForm] = useState({
         name: '',
         description: '',
@@ -28,7 +28,7 @@ const UpdateProduct = () => {
                     description: product.description,
                     price: product.price,
                     stock: product.stock,
-                    image: null, // Reset image here
+                    image: null, 
                 });
             } catch (err) {
                 setError(err.message);

@@ -1,4 +1,4 @@
-// src/components/AdminSignin.jsx
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilState } from 'recoil';
@@ -13,30 +13,30 @@ const AdminSignin = () => {
     password: '',
   });
 
-  const [token, setToken] = useRecoilState(AdmintokenAtom); // Correct destructuring
-  const [error, setError] = useState(null); // State for error messages
+  const [token, setToken] = useRecoilState(AdmintokenAtom); 
+  const [error, setError] = useState(null); 
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  async function handleSubmit(e) { // Accept the event parameter
-    e.preventDefault(); // Prevent default form submission
-    setError(null); // Reset error state
+  async function handleSubmit(e) { 
+    e.preventDefault(); 
+    setError(null); 
     try {
       const token = await Adminsignin(form.email, form.password);
       if(token){
         setToken(token);
-        localStorage.setItem("token", token); // Store token in localStorage
+        localStorage.setItem("token", token); 
         setForm({
           email:"",
           password: "",
         });
         console.log('Admin Signin:', form);
-        navigate('/admin/dashboard'); // Navigate to Admin Dashboard
+        navigate('/admin/dashboard'); 
       }
     } catch (err) {
-      setError(err.message || 'Failed to sign in'); // Set error state
+      setError(err.message || 'Failed to sign in'); 
     }
   }
 
@@ -47,7 +47,7 @@ const AdminSignin = () => {
         {error && <div className="text-red-500 mb-4">{error}</div>} {/* Display error */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
-            type="email" // Changed to 'email' type for better validation
+            type="email" 
             name="email"
             placeholder="Email"
             required
@@ -56,7 +56,7 @@ const AdminSignin = () => {
             onChange={handleChange}
           />
           <input
-            type="password" // Changed to 'password' type for security
+            type="password" 
             name="password"
             placeholder="Password"
             required
@@ -75,7 +75,7 @@ const AdminSignin = () => {
         <p className="mt-4 text-center text-gray-600">
           Don't have an admin account?{' '}
           <span
-            onClick={() => navigate('/admin-signup')} // Correct navigation path
+            onClick={() => navigate('/admin-signup')}
             className="text-primary cursor-pointer hover:underline"
           >
             Sign Up

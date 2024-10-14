@@ -65,7 +65,7 @@ const ProductsList = () => {
         return <div className="text-red-500 text-center mt-10">{error}</div>;
     }
 
-    // Filter products based on search term
+    
     const filteredProducts = products.filter(product =>
         product.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -74,7 +74,7 @@ const ProductsList = () => {
         <div className="container mx-auto p-4">
             <h2 className="text-2xl font-bold mb-4">Products List</h2>
 
-            {/* Search Form */}
+          
             <div className="mb-4">
                 <input
                     type="text"
@@ -129,7 +129,7 @@ const ProductsList = () => {
                 </table>
             )}
 
-            {/* Pagination Controls */}
+          
             <div className="flex justify-center mt-4 space-x-2">
                 <button
                     onClick={handlePrevPage}

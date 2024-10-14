@@ -4,7 +4,7 @@ require("dotenv").config();
 exports.UserAuth = async (req, res, next) => {
     try {
         const authHeader = req.header("Authorization");
-        console.log("Authorization Header:", authHeader); // Debugging
+        console.log("Authorization Header:", authHeader); 
 
         if (!authHeader) {
             return res.status(403).json({ message: "Authorization header not found" });
@@ -15,16 +15,16 @@ exports.UserAuth = async (req, res, next) => {
         }
 
         const token = authHeader.replace("Bearer ", "").trim();
-        console.log("Token:", token); // Debugging
+        console.log("Token:", token); 
 
         if (!token) {
             return res.status(403).json({ message: "Token not found" });
         }
 
         const payload = jwt.verify(token, process.env.JWT_SECRET);
-        console.log("JWT Payload:", payload); // Debugging
+        console.log("JWT Payload:", payload); 
 
-        req.userId = payload.userId; // Ensure consistency with token signing
+        req.userId = payload.userId; 
         next();
     } catch (error) {
         console.error("UserAuth Middleware Error:", error);

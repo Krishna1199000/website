@@ -68,7 +68,7 @@ const UserSignin = () => {
             setToken(token);
             localStorage.setItem("token", token);
             toast.success('Signed in successfully!');
-            navigate('/user/dashboard'); // Redirect to user dashboard
+            navigate('/user/dashboard'); 
         } else {
             toast.error('Invalid credentials. Please try again.');
         }

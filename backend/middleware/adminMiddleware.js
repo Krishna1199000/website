@@ -1,11 +1,11 @@
-// backend/middleware/adminMiddleware.js
+
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
 exports.AdminAuth = async (req, res, next) => {
     try {
         const authHeader = req.header("Authorization");
-        console.log("Authorization Header:", authHeader); // Debugging
+        console.log("Authorization Header:", authHeader); 
 
         if (!authHeader) {
             return res.status(403).json({ message: "Authorization header not found" });
@@ -16,16 +16,15 @@ exports.AdminAuth = async (req, res, next) => {
         }
 
         const token = authHeader.replace("Bearer ", "").trim();
-        console.log("Token:", token); // Debugging
-
+        console.log("Token:", token); 
         if (!token) {
             return res.status(403).json({ message: "Token not found" });
         }
 
         const payload = jwt.verify(token, process.env.JWT_SECRET);
-        console.log("JWT Payload:", payload); // Debugging
+        console.log("JWT Payload:", payload); 
 
-        req.adminId = payload.adminId; // Ensure consistency with token signing
+        req.adminId = payload.adminId; 
         next();
     } catch (error) {
         console.error("AdminAuth Middleware Error:", error);
