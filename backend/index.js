@@ -9,7 +9,7 @@ const path = require('path')
 
 
 const corsOptions = {
-    origin: 'https://lighthearted-pie-08b47b.netlify.app', 
+    origin: 'https://website-kappa-woad.vercel.app', 
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     
     credentials: true, 
