@@ -36,7 +36,7 @@ const UserPrivateRoute = ({ children }) => {
 function App() {
     return (
         <RecoilRoot>
-            <Router>
+            <Router basename='/app'>
                 <ToastContainer />
                 <Routes>
                    
