@@ -52,9 +52,9 @@ const UserPurchases = () => {
                     <PurchaseList>
                         {purchases.map((purchase) => (
                             <PurchaseItem key={purchase.id}>
-                                <h3>{purchase.productName}</h3>
+                                <h3>{purchase.name}</h3>
                                 <p>Price: ₹{purchase.price}</p>
-                                <p>Date: {new Date(purchase.date).toLocaleDateString()}</p>
+                                {/* <p>Date: {new Date(purchase.date).toLocaleDateString()}</p> */}
                             </PurchaseItem>
                         ))}
                     </PurchaseList>

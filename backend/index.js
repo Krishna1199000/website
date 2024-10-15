@@ -27,6 +27,7 @@ dbConnect();
 
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/admin",adminRoutes);
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.get("/", (req, res) => {
     res.send("Welcome to the API!");
