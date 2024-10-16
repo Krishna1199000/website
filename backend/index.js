@@ -31,13 +31,15 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(express.static(path.join(__dirname, 'build'))); 
 
 
+app.get("/", (req, res) => {
+    res.send("Welcome to the API!");
+});
+
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
-app.get("/", (req, res) => {
-    res.send("Welcome to the API!");
-});
+
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, ()=> {
