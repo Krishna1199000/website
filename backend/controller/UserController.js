@@ -290,4 +290,57 @@ exports.getBalance = async (req,res) => {
         console.error(error);
         res.status(500).json({message: "Server errror"})
     }
+};
+
+const cancelOrderSchema = z.object({
+    TransactionId: z.string().min(1,"TransactionId cannot be empty")
+})
+exports.cancelOrder = async (req, res) => {
+    try{
+        const {TransactionId} = req.body;
+
+        const validatedInputs = cancelOrderSchema.safeParse({TransactionId});
+        if(!validatedInputs.success){
+            const errorMsg = validatedInputs.error.errors.map(err=> err.message).join(', ');
+            return res.status(400).json({message: errorMsg});
+        }
+        
+        const transaction = await Transaction.findById(transactionId);
+        if(!transaction || transaction.isReversed){
+            return res.status(404).json({message: 'Transaction not found or already reversed'})
+        }
+
+        const user = await User.findById(transaction.user);
+        if(!user){
+            return res.status(404).json({message: 'User not found'});
+        }
+
+        const product = await Product.findById(transaction.product);
+        if(!product) {
+            return res.status(404).json({message: 'Product not found'});
+        }
+
+
+        user.balance += transaction.amount;
+        product.stock += 1;
+
+        await user.save();
+        await product.save();
+
+        transaction.isReversed = true;
+        await transaction.save();
+
+        const refundTransaction = await Transaction.create({
+            user: user._id,
+            type: 'refund',
+            amount: transaction.amount,
+            description: `Refund for ${product.name}`,
+            product: product._id,
+        });
+
+        res.status(200).json({message: 'Order cancelled, refund processed', balance: user.balance, refundTransaction})
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).send('Server error');
+    }
 }

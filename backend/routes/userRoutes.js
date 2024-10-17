@@ -17,4 +17,5 @@ router.get("/purchases",UserAuth,getUserPurchases)
 router.get("/products",getAllProducts)
 router.post("/search", UserAuth,searchProducts); 
 router.get("/balance",UserAuth,getBalance)
+router.post("/cancel-order",UserAuth,cancelOrder)
 module.exports = router;
