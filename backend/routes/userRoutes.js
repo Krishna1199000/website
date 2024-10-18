@@ -5,7 +5,7 @@ const {Usersignup,Usersignin,updatePassword,addMoney,
     getAllProducts,
     searchProducts,
     getUserPurchases,
-    getBalance} = require("../controller/UserController")
+    getBalance,cancelOrder} = require("../controller/UserController")
 const {UserAuth} = require("../middleware/usermiddleware")
 
 router.post("/UserSignup",Usersignup);

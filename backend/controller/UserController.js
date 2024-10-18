@@ -292,55 +292,51 @@ exports.getBalance = async (req,res) => {
     }
 };
 
-const cancelOrderSchema = z.object({
-    TransactionId: z.string().min(1,"TransactionId cannot be empty")
-})
+const mongoose = require('mongoose');
+
+// Cancel Order and Process Refund
 exports.cancelOrder = async (req, res) => {
-    try{
-        const {TransactionId} = req.body;
+    try {
+        const { transactionId } = req.body;
 
-        const validatedInputs = cancelOrderSchema.safeParse({TransactionId});
-        if(!validatedInputs.success){
-            const errorMsg = validatedInputs.error.errors.map(err=> err.message).join(', ');
-            return res.status(400).json({message: errorMsg});
-        }
-        
+        // Find the transaction to ensure it exists
         const transaction = await Transaction.findById(transactionId);
-        if(!transaction || transaction.isReversed){
-            return res.status(404).json({message: 'Transaction not found or already reversed'})
+        if (!transaction) {
+            return res.status(404).json({ message: 'Transaction not found' });
         }
 
+        // Check if the transaction is already reversed
+        if (transaction.isReversed) {
+            return res.status(400).json({ message: 'This order has already been cancelled' });
+        }
+
+        // Fetch user and product details from the transaction
         const user = await User.findById(transaction.user);
-        if(!user){
-            return res.status(404).json({message: 'User not found'});
-        }
-
         const product = await Product.findById(transaction.product);
-        if(!product) {
-            return res.status(404).json({message: 'Product not found'});
+
+        if (!user || !product) {
+            return res.status(404).json({ message: 'User or product not found' });
         }
 
-
+        // Refund the user's balance
         user.balance += transaction.amount;
-        product.stock += 1;
-
         await user.save();
+
+        // Restore product stock
+        product.stock += 1;
         await product.save();
 
+        // Mark the transaction as reversed
         transaction.isReversed = true;
         await transaction.save();
 
-        const refundTransaction = await Transaction.create({
-            user: user._id,
-            type: 'refund',
-            amount: transaction.amount,
-            description: `Refund for ${product.name}`,
-            product: product._id,
+        res.status(200).json({
+            message: 'Order cancelled and refund processed successfully',
+            userBalance: user.balance,
+            productStock: product.stock,
         });
-
-        res.status(200).json({message: 'Order cancelled, refund processed', balance: user.balance, refundTransaction})
     } catch (error) {
-        console.error(error.message);
-        res.status(500).send('Server error');
+        console.error('Error cancelling order:', error);
+        res.status(500).json({ message: 'Server error while cancelling order' });
     }
-}
+};

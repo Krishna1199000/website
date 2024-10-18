@@ -189,3 +189,16 @@ export const getBalance = async(token) => {
         throw error;
     }
 }
+
+export const cancelOrderApi = async (token, data) => {
+    try {
+        const response = await apiConnector('POST', `${BASE_URL}/user/cancel-order`, data, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        return response;
+    } catch (error) {
+        console.log('Cancel order error:', error);
+        throw error;
+    }
+};
+
