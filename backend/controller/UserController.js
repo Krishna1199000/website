@@ -168,58 +168,58 @@ exports.addMoney = async (req, res) => {
 };
 
 
-// const purchaseSchema = z.object({
-//     productId: z.string().length(24, "Invalid product ID length"),
-// })
-// exports.purchaseProduct = async (req, res) => {
-//     try {
-//         const { productId } = req.body;
+const purchaseSchema = z.object({
+    productId: z.string().length(24, "Invalid product ID length"),
+})
+exports.purchaseProduct = async (req, res) => {
+    try {
+        const { productId } = req.body;
 
-//         const validatedInputs = purchaseSchema.safeParse({ productId });
+        const validatedInputs = purchaseSchema.safeParse({ productId });
 
-//         if (!validatedInputs.success) {
-//             return res.status(400).json({ message: "Error while purchasing product", errors: validatedInputs.error.errors });
-//         }
+        if (!validatedInputs.success) {
+            return res.status(400).json({ message: "Error while purchasing product", errors: validatedInputs.error.errors });
+        }
 
-//         const user = await User.findById(req.userId);
-//         if (!user) {
-//             return res.status(404).json({ msg: "User not found" });
-//         }
+        const user = await User.findById(req.userId);
+        if (!user) {
+            return res.status(404).json({ msg: "User not found" });
+        }
 
-//         const product = await Product.findById(productId);
-//         if (!product) {
-//             return res.status(404).json({ msg: 'Product not found' });
-//          }
+        const product = await Product.findById(productId);
+        if (!product) {
+            return res.status(404).json({ msg: 'Product not found' });
+         }
 
-//         if (user.balance < product.price) {
-//             return res.status(400).json({ msg: 'Insufficient balance' });
-//         }
+        if (user.balance < product.price) {
+            return res.status(400).json({ msg: 'Insufficient balance' });
+        }
 
-//         if (product.stock < 1) {
-//             return res.status(400).json({ msg: 'Product out of stock' });
-//         }
+        if (product.stock < 1) {
+            return res.status(400).json({ msg: 'Product out of stock' });
+        }
 
-//         user.balance -= product.price;
-//         user.purchases.push(product._id);
-//         await user.save();
+        user.balance -= product.price;
+        user.purchases.push(product._id);
+        await user.save();
 
-//         product.stock -= 1;
-//         await product.save();
+        product.stock -= 1;
+        await product.save();
 
-//         const transaction = await Transaction.create({
-//             user: user._id,
-//             type: 'debit',
-//             amount: product.price,
-//             description: `Purchased ${product.name}`,
-//             product: product._id,
-//         });
+        const transaction = await Transaction.create({
+            user: user._id,
+            type: 'debit',
+            amount: product.price,
+            description: `Purchased ${product.name}`,
+            product: product._id,
+        });
 
-//         res.status(200).json({ balance: user.balance, transaction, product });
-//     } catch (error) {
-//         console.error(error.message);
-//         res.status(500).send('Server error');
-//     }
-// };
+        res.status(200).json({ balance: user.balance, transaction, product });
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).send('Server error');
+    }
+};
 exports.getAllProducts = async (req,res) => {
     try{
         const products = await Product.find();
@@ -294,23 +294,23 @@ exports.getBalance = async (req,res) => {
 
 const mongoose = require('mongoose');
 
-// Cancel Order and Process Refund
+
 exports.cancelOrder = async (req, res) => {
     try {
         const { transactionId } = req.body;
 
-        // Find the transaction to ensure it exists
+
         const transaction = await Transaction.findById(transactionId);
         if (!transaction) {
             return res.status(404).json({ message: 'Transaction not found' });
         }
 
-        // Check if the transaction is already reversed
+
         if (transaction.isReversed) {
             return res.status(400).json({ message: 'This order has already been cancelled' });
         }
 
-        // Fetch user and product details from the transaction
+
         const user = await User.findById(transaction.user);
         const product = await Product.findById(transaction.product);
 
@@ -318,15 +318,14 @@ exports.cancelOrder = async (req, res) => {
             return res.status(404).json({ message: 'User or product not found' });
         }
 
-        // Refund the user's balance
+    
         user.balance += transaction.amount;
         await user.save();
 
-        // Restore product stock
+    
         product.stock += 1;
         await product.save();
 
-        // Mark the transaction as reversed
         transaction.isReversed = true;
         await transaction.save();
 
@@ -429,5 +428,20 @@ exports.buyProducts = async (req,res) => {
     } catch (error){
         console.error("Error buying products:", error.message);
         res.status(500).send("Server error")
+    }
+}
+
+const getUserReceipt = async (req,res) => {
+    try{
+        const userId = req.user.id;
+        const lastPurchase = await Purchase.findOne({userId}).sort({date: -1});
+        if(!lastPurchase){
+            return res.status(404).json({message: "No receipt found"});
+        }
+        else{
+            res.status(200).json(lastPurchase);
+        }
+    } catch (error) {
+        res.status(500).json({message: "Error fetching receipt."});
     }
 }
