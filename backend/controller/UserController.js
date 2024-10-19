@@ -168,58 +168,58 @@ exports.addMoney = async (req, res) => {
 };
 
 
-const purchaseSchema = z.object({
-    productId: z.string().length(24, "Invalid product ID length"),
-})
-exports.purchaseProduct = async (req, res) => {
-    try {
-        const { productId } = req.body;
+// const purchaseSchema = z.object({
+//     productId: z.string().length(24, "Invalid product ID length"),
+// })
+// exports.purchaseProduct = async (req, res) => {
+//     try {
+//         const { productId } = req.body;
 
-        const validatedInputs = purchaseSchema.safeParse({ productId });
+//         const validatedInputs = purchaseSchema.safeParse({ productId });
 
-        if (!validatedInputs.success) {
-            return res.status(400).json({ message: "Error while purchasing product", errors: validatedInputs.error.errors });
-        }
+//         if (!validatedInputs.success) {
+//             return res.status(400).json({ message: "Error while purchasing product", errors: validatedInputs.error.errors });
+//         }
 
-        const user = await User.findById(req.userId);
-        if (!user) {
-            return res.status(404).json({ msg: "User not found" });
-        }
+//         const user = await User.findById(req.userId);
+//         if (!user) {
+//             return res.status(404).json({ msg: "User not found" });
+//         }
 
-        const product = await Product.findById(productId);
-        if (!product) {
-            return res.status(404).json({ msg: 'Product not found' });
-         }
+//         const product = await Product.findById(productId);
+//         if (!product) {
+//             return res.status(404).json({ msg: 'Product not found' });
+//          }
 
-        if (user.balance < product.price) {
-            return res.status(400).json({ msg: 'Insufficient balance' });
-        }
+//         if (user.balance < product.price) {
+//             return res.status(400).json({ msg: 'Insufficient balance' });
+//         }
 
-        if (product.stock < 1) {
-            return res.status(400).json({ msg: 'Product out of stock' });
-        }
+//         if (product.stock < 1) {
+//             return res.status(400).json({ msg: 'Product out of stock' });
+//         }
 
-        user.balance -= product.price;
-        user.purchases.push(product._id);
-        await user.save();
+//         user.balance -= product.price;
+//         user.purchases.push(product._id);
+//         await user.save();
 
-        product.stock -= 1;
-        await product.save();
+//         product.stock -= 1;
+//         await product.save();
 
-        const transaction = await Transaction.create({
-            user: user._id,
-            type: 'debit',
-            amount: product.price,
-            description: `Purchased ${product.name}`,
-            product: product._id,
-        });
+//         const transaction = await Transaction.create({
+//             user: user._id,
+//             type: 'debit',
+//             amount: product.price,
+//             description: `Purchased ${product.name}`,
+//             product: product._id,
+//         });
 
-        res.status(200).json({ balance: user.balance, transaction, product });
-    } catch (error) {
-        console.error(error.message);
-        res.status(500).send('Server error');
-    }
-};
+//         res.status(200).json({ balance: user.balance, transaction, product });
+//     } catch (error) {
+//         console.error(error.message);
+//         res.status(500).send('Server error');
+//     }
+// };
 exports.getAllProducts = async (req,res) => {
     try{
         const products = await Product.find();
@@ -340,3 +340,94 @@ exports.cancelOrder = async (req, res) => {
         res.status(500).json({ message: 'Server error while cancelling order' });
     }
 };
+const addProductToBucketSchema = z.object({
+    productId: z.string().length(24,'Invalid product ID length'),
+});
+
+exports.addProductToBucket = async (req,res) => {
+    try{
+        const {productId} = req.body;
+        const validatedInputs = addProductToBucketSchema.safeParse({productId});
+
+        if(!validatedInputs.success){
+            return res.status(400).json({message: "Invalid product ID"});
+        }
+
+        const user = await User.findById(req.userId);
+        if(!user){
+            return res.status(404).json({message: "User not found"});
+        }
+
+        const product = await Product.findById(productId);
+        if(!product){
+            return res.status(404).json({message: "Product not found"});
+        }
+
+        if(product.stock < 1) {
+            return res.status(400).json({message: "Product out of stock"});
+        }
+
+        user.bucket.push(product._id);
+        await user.save();
+
+        res.status(200).json({message: "Product added to bucket", bucket: user.bucket})
+    } catch (error){
+        console.error("Error adding product to bucket:", error.message);
+        res.status(500).send("server error");
+    }
+}
+
+exports.buyProducts = async (req,res) => {
+    try{
+        const user = await User.findById(req.userId).populate('bucket');
+        if(!user){
+            return res.status(404).json({message: "User not found"});
+        }
+
+        if(user.bucket.length === 0){
+            return res.status(400).json({message: "Bucket is empty"});
+        }
+
+        let totalAmount = 0;
+        for(const product of user.bucket){
+            totalAmount += product.price;
+
+            if(product.stock < 1){
+                return res.status(400).json({message: `Product ${product.name} is out of stock`});
+            }
+        }
+
+        if(user.balance < totalAmount){
+            return res.status(400).json({message: "Insufficient balanace"});
+        }
+
+        for(const product of user.bucket){
+            product.stock -= 1;
+            await product.save();
+
+            await Transaction.create({
+                user: user._id,
+                type: 'debit',
+                amount: product.price,
+                description: `Purchased ${product.name}`,
+                product: product._id,
+            });
+
+            user.purchases.push(product._id);
+        }
+
+        user.balance -= totalAmount;
+        user.bucket = [];
+
+        const receipt = {
+            user: user.username,
+            totalAmount,
+            products : user.purchases,
+        };
+
+        res.status(200).json({message: "Purchase successful", balance: user.balance, receipt});
+    } catch (error){
+        console.error("Error buying products:", error.message);
+        res.status(500).send("Server error")
+    }
+}
