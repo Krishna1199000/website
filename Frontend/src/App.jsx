@@ -12,6 +12,7 @@ import ProductsList from './pages/ProductsList';
 import UserSignup from './pages/UserSignup';
 import UserSignin from './pages/UserSignin';
 import UserDashboard from './pages/UserDashboard';
+import BucketPage from './pages/BucketPage'; // Import the Bucket page
 import AddMoney from './pages/AddMoney';
 import UpdateUserPassword from './pages/UpdateUserPassword';
 import UserPurchases from './pages/UserPurchases';
@@ -21,12 +22,10 @@ import { UsertokenAtom } from './stores/Useratoms';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-
 const PrivateRoute = ({ children }) => {
     const token = useRecoilValue(AdmintokenAtom);
     return token ? children : <Navigate to="/admin-signin" />;
 };
-
 
 const UserPrivateRoute = ({ children }) => {
     const token = useRecoilValue(UsertokenAtom);
@@ -36,17 +35,13 @@ const UserPrivateRoute = ({ children }) => {
 function App() {
     return (
         <RecoilRoot>
-            <Router >
+            <Router>
                 <ToastContainer />
                 <Routes>
-                   
                     <Route path="/" element={<Home />} />
-
-                    
                     <Route path="/user-signup" element={<UserSignup />} />
                     <Route path="/user-signin" element={<UserSignin />} />
-                    
-                    
+
                     <Route
                         path="/user/dashboard"
                         element={
@@ -55,7 +50,15 @@ function App() {
                             </UserPrivateRoute>
                         }
                     />
-                     <Route
+                    <Route
+                        path="/user/bucket" // Add the Bucket page route here
+                        element={
+                            <UserPrivateRoute>
+                                <BucketPage />
+                            </UserPrivateRoute>
+                        }
+                    />
+                    <Route
                         path="/user/add-money"
                         element={
                             <UserPrivateRoute>
@@ -63,7 +66,7 @@ function App() {
                             </UserPrivateRoute>
                         }
                     />
-                     <Route
+                    <Route
                         path="/user/purchases"
                         element={
                             <UserPrivateRoute>
@@ -71,7 +74,7 @@ function App() {
                             </UserPrivateRoute>
                         }
                     />
-                     <Route
+                    <Route
                         path="/user/updateCredentials"
                         element={
                             <UserPrivateRoute>
@@ -80,7 +83,6 @@ function App() {
                         }
                     />
 
-                    
                     <Route path="/admin-signup" element={<AdminSignup />} />
                     <Route path="/admin-signin" element={<AdminSignin />} />
                     <Route

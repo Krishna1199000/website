@@ -202,3 +202,51 @@ export const cancelOrderApi = async (token, data) => {
     }
 };
 
+export const addProductToBucket = async (productId, token) => {
+    try {
+        const response = await apiConnector(
+            "POST",
+            `${BASE_URL}/user/add-to-bucket`,
+            { productId },
+            { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        if (response.status === 200) {
+            return response.data; 
+        } else {
+            throw new Error(response.data.message);
+        }
+    } catch (error) {
+        console.error("Error adding product to bucket...", error.message);
+        throw error;
+    }
+};
+
+
+export const buyProducts = async (token) => {
+    try {
+        const response = await apiConnector(
+            "POST",
+            `${BASE_URL}/user/buy`,
+            null, 
+            { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        if (response.status === 200) {
+            return response.data;
+        } else {
+            throw new Error(response.data.message);
+        }
+    } catch (error) {
+        if (error.response) {
+            console.error("Error purchasing products:", error.response.data);
+            throw new Error(error.response.data.message || 'Purchase failed.');
+        } else if (error.request) {
+            console.error("No response received:", error.request);
+            throw new Error('No response from server.');
+        } else {
+            console.error("Error:", error.message);
+            throw new Error('An unexpected error occurred.');
+        }
+    }
+};

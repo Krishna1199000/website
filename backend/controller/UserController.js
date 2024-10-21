@@ -369,7 +369,13 @@ exports.addProductToBucket = async (req,res) => {
         user.bucket.push(product._id);
         await user.save();
 
-        res.status(200).json({message: "Product added to bucket", bucket: user.bucket})
+        res.status(200).json({message: "Product added to bucket",
+             bucket: user.bucket.map(item=>({
+                name:product.name,
+                imageUrl: product.imageUrl,
+                price: product.price,
+             })),
+            });
     } catch (error){
         console.error("Error adding product to bucket:", error.message);
         res.status(500).send("server error");
@@ -421,7 +427,11 @@ exports.buyProducts = async (req,res) => {
         const receipt = {
             user: user.username,
             totalAmount,
-            products : user.purchases,
+            products : user.purchases.map(item => ({
+                name: item.name,
+                price: item.price,
+                image: item.imageUrl,
+            })),
         };
 
         res.status(200).json({message: "Purchase successful", balance: user.balance, receipt});
@@ -431,7 +441,7 @@ exports.buyProducts = async (req,res) => {
     }
 }
 
-const getUserReceipt = async (req,res) => {
+exports.getUserReceipt = async (req,res) => {
     try{
         const userId = req.user.id;
         const lastPurchase = await Purchase.findOne({userId}).sort({date: -1});
@@ -443,5 +453,28 @@ const getUserReceipt = async (req,res) => {
         }
     } catch (error) {
         res.status(500).json({message: "Error fetching receipt."});
+    }
+}
+exports.getBucketItems = async (req,res) => {
+    try{
+        const user = await User.findById(req.userId).populate('bucket');
+        if(!user){
+            return res.status(404).json({message: "User not found"});
+        }
+        if(!user.bucket || user.bucket.length === 0){
+            return res.status(200).json({message: "Bucket is empty", bucket: []});
+        }
+
+        const bucketItems = user.bucket.map(item=> ({
+            id: item._id,
+            name: item.name,
+            price: item.price,
+            imageUrl: item.imageUrl,
+        }));
+
+        res.status(200).json({bucket: bucketItems});
+    } catch (error) {
+        console.error('Error fetching bucket item:', error.message);
+        res.status(500).send('Server error')
     }
 }
