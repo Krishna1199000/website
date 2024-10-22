@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const jwt = require("jsonwebtoken");
 const {z} = require("zod");
 const User = require("../models/User/user");
@@ -291,10 +292,6 @@ exports.getBalance = async (req,res) => {
         res.status(500).json({message: "Server errror"})
     }
 };
-
-const mongoose = require('mongoose');
-
-
 exports.cancelOrder = async (req, res) => {
     try {
         const { transactionId } = req.body;

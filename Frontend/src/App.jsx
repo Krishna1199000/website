@@ -22,6 +22,7 @@ import { UsertokenAtom } from './stores/Useratoms';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+// Define private routes for admin and user
 const PrivateRoute = ({ children }) => {
     const token = useRecoilValue(AdmintokenAtom);
     return token ? children : <Navigate to="/admin-signin" />;
@@ -32,16 +33,19 @@ const UserPrivateRoute = ({ children }) => {
     return token ? children : <Navigate to="/user-signin" />;
 };
 
+// Main App component
 function App() {
     return (
         <RecoilRoot>
             <Router>
                 <ToastContainer />
                 <Routes>
+                    {/* Public routes */}
                     <Route path="/" element={<Home />} />
                     <Route path="/user-signup" element={<UserSignup />} />
                     <Route path="/user-signin" element={<UserSignin />} />
 
+                    {/* User private routes */}
                     <Route
                         path="/user/dashboard"
                         element={
@@ -51,7 +55,7 @@ function App() {
                         }
                     />
                     <Route
-                        path="/user/bucket" // Add the Bucket page route here
+                        path="/user/bucket" 
                         element={
                             <UserPrivateRoute>
                                 <BucketPage />
@@ -83,6 +87,7 @@ function App() {
                         }
                     />
 
+                    {/* Admin routes */}
                     <Route path="/admin-signup" element={<AdminSignup />} />
                     <Route path="/admin-signin" element={<AdminSignin />} />
                     <Route
@@ -126,6 +131,7 @@ function App() {
                         }
                     />
 
+                    {/* Fallback route */}
                     <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
             </Router>

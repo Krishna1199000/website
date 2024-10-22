@@ -1,11 +1,13 @@
 
 
 import React, { useState } from 'react';
+import { FaShoppingCart } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaBars } from 'react-icons/fa';
-import { useSetRecoilState } from 'recoil';
+import { useSetRecoilState , useRecoilValue} from 'recoil';
 import { UsertokenAtom } from '../stores/Useratoms';
 import styled from 'styled-components';
+import { bucketAtom } from '../stores/Useratoms';
 
 
 
@@ -74,6 +76,7 @@ const MenuItem = styled.li`
 const UserNavbar = () => {
     const [isOpen, setIsOpen] = useState(false);
     const setToken = useSetRecoilState(UsertokenAtom);
+    const bucketItems = useRecoilValue(bucketAtom);
     const navigate = useNavigate();
 
     const handleLogout = () => {
@@ -99,6 +102,12 @@ const UserNavbar = () => {
                 </MenuItem>
                 <MenuItem>
                     <Link to="/user/updateCredentials">Update Password</Link>
+                </MenuItem>
+                <MenuItem>
+                    <Link to="/user/bucket">
+                        <FaShoppingCart size={20} />
+                        <span>({bucketItems.length})</span> {/* Shows item count */}
+                    </Link>
                 </MenuItem>
                 <MenuItem>
                     <Link to="/user/purchases">My Purchases</Link>
