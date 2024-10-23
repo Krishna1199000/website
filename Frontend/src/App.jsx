@@ -16,6 +16,8 @@ import BucketPage from './pages/BucketPage'; // Import the Bucket page
 import AddMoney from './pages/AddMoney';
 import UpdateUserPassword from './pages/UpdateUserPassword';
 import UserPurchases from './pages/UserPurchases';
+import ReceiptPage from './pages/ReceiptPage';
+
 
 import { AdmintokenAtom } from './stores/Adminatoms';
 import { UsertokenAtom } from './stores/Useratoms';
@@ -55,7 +57,7 @@ function App() {
                         }
                     />
                     <Route
-                        path="/user/bucket" 
+                        path="/user/bucket"
                         element={
                             <UserPrivateRoute>
                                 <BucketPage />
@@ -83,6 +85,22 @@ function App() {
                         element={
                             <UserPrivateRoute>
                                 <UpdateUserPassword />
+                            </UserPrivateRoute>
+                        }
+                    />
+                    <Route
+                        path="/user/bucket"
+                        element={
+                            <UserPrivateRoute>
+                                <BucketPage />
+                            </UserPrivateRoute>
+                        }
+                    />
+                    <Route
+                        path="/user/receipt"
+                        element={
+                            <UserPrivateRoute>
+                                <ReceiptPage />
                             </UserPrivateRoute>
                         }
                     />

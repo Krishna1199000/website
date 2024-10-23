@@ -336,142 +336,131 @@ exports.cancelOrder = async (req, res) => {
         res.status(500).json({ message: 'Server error while cancelling order' });
     }
 };
-const addProductToBucketSchema = z.object({
-    productId: z.string().length(24,'Invalid product ID length'),
+
+// User Routes
+
+
+// User Controller
+const addToBucketSchema = z.object({
+    productId: z.string().length(24, "Invalid product ID length"),
 });
 
-exports.addProductToBucket = async (req,res) => {
-    try{
-        const {productId} = req.body;
-        const validatedInputs = addProductToBucketSchema.safeParse({productId});
+exports.addToBucket = async (req, res) => {
+    try {
+        const { productId } = req.body;
+        const validatedInputs = addToBucketSchema.safeParse({ productId });
 
-        if(!validatedInputs.success){
-            return res.status(400).json({message: "Invalid product ID"});
+        if (!validatedInputs.success) {
+            return res.status(400).json({ message: "Invalid product ID" });
         }
 
         const user = await User.findById(req.userId);
-        if(!user){
-            return res.status(404).json({message: "User not found"});
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
         }
 
         const product = await Product.findById(productId);
-        if(!product){
-            return res.status(404).json({message: "Product not found"});
+        if (!product) {
+            return res.status(404).json({ message: "Product not found" });
         }
 
-        if(product.stock < 1) {
-            return res.status(400).json({message: "Product out of stock"});
-        }
-
+        // Add product to the user's bucket
         user.bucket.push(product._id);
         await user.save();
 
-        res.status(200).json({message: "Product added to bucket",
-             bucket: user.bucket.map(item=>({
-                name:product.name,
-                imageUrl: product.imageUrl,
-                price: product.price,
-             })),
-            });
-    } catch (error){
-        console.error("Error adding product to bucket:", error.message);
-        res.status(500).send("server error");
+        res.status(200).json({ message: "Product added to bucket", bucket: user.bucket });
+    } catch (error) {
+        console.error("Error adding to bucket:", error);
+        res.status(500).json({ message: "Server error" });
     }
-}
+};
 
-exports.buyProducts = async (req,res) => {
-    try{
+
+exports.viewBucket = async (req, res) => {
+    try {
         const user = await User.findById(req.userId).populate('bucket');
-        if(!user){
-            return res.status(404).json({message: "User not found"});
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
         }
 
-        if(user.bucket.length === 0){
-            return res.status(400).json({message: "Bucket is empty"});
+        res.status(200).json({ bucket: user.bucket });
+    } catch (error) {
+        console.error("Error fetching bucket:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
+
+exports.buyAllProducts = async (req, res) => {
+    try {
+        const user = await User.findById(req.userId).populate('bucket');
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
         }
 
         let totalAmount = 0;
-        for(const product of user.bucket){
-            totalAmount += product.price;
+        const purchasedProducts = [];
 
-            if(product.stock < 1){
-                return res.status(400).json({message: `Product ${product.name} is out of stock`});
+      
+        for (const product of user.bucket) {
+            if (product.stock < 1) {
+                return res.status(400).json({ message: `Product ${product.name} is out of stock` });
             }
+            totalAmount += product.price;
+            purchasedProducts.push(product);
         }
 
-        if(user.balance < totalAmount){
-            return res.status(400).json({message: "Insufficient balanace"});
+        if (user.balance < totalAmount) {
+            return res.status(400).json({ message: "Insufficient balance" });
         }
 
-        for(const product of user.bucket){
+        // Update user balance and product stock
+        user.balance -= totalAmount;
+        for (const product of purchasedProducts) {
             product.stock -= 1;
             await product.save();
-
-            await Transaction.create({
-                user: user._id,
-                type: 'debit',
-                amount: product.price,
-                description: `Purchased ${product.name}`,
-                product: product._id,
-            });
-
-            user.purchases.push(product._id);
         }
 
-        user.balance -= totalAmount;
-        user.bucket = [];
+        user.purchases.push(...purchasedProducts.map(p => p._id));
+        user.bucket = [];  // Clear the bucket after purchase
+        await user.save();
+
+        // Create a transaction record
+        const transaction = await Transaction.create({
+            user: user._id,
+            type: 'debit',
+            amount: totalAmount,
+            description: 'Purchased multiple products',
+            product: null,  // Since it's multiple products
+        });
+
+        res.status(200).json({
+            message: "Purchase successful",
+            balance: user.balance,
+            transaction,
+            purchasedProducts
+        });
+    } catch (error) {
+        console.error("Error purchasing products:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+exports.getUserReceipt = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const user = await User.findById(userId).populate('purchases.product');
 
         const receipt = {
-            user: user.username,
-            totalAmount,
-            products : user.purchases.map(item => ({
-                name: item.name,
-                price: item.price,
-                image: item.imageUrl,
+            purchases: user.purchases.map(item => ({
+                name: item.product.name,
+                price: item.product.price,
+                quantity: item.quantity,
             })),
+            total: user.purchases.reduce((acc, item) => acc + item.product.price * item.quantity, 0),
         };
 
-        res.status(200).json({message: "Purchase successful", balance: user.balance, receipt});
-    } catch (error){
-        console.error("Error buying products:", error.message);
-        res.status(500).send("Server error")
-    }
-}
-
-exports.getUserReceipt = async (req,res) => {
-    try{
-        const userId = req.user.id;
-        const lastPurchase = await Purchase.findOne({userId}).sort({date: -1});
-        if(!lastPurchase){
-            return res.status(404).json({message: "No receipt found"});
-        }
-        else{
-            res.status(200).json(lastPurchase);
-        }
+        res.status(200).json(receipt);
     } catch (error) {
-        res.status(500).json({message: "Error fetching receipt."});
+        res.status(500).json({ message: 'Failed to get receipt', error: error.message });
     }
-}
-exports.getBucketItems = async (req,res) => {
-    try{
-        const user = await User.findById(req.userId).populate('bucket');
-        if(!user){
-            return res.status(404).json({message: "User not found"});
-        }
-        if(!user.bucket || user.bucket.length === 0){
-            return res.status(200).json({message: "Bucket is empty", bucket: []});
-        }
-
-        const bucketItems = user.bucket.map(item=> ({
-            id: item._id,
-            name: item.name,
-            price: item.price,
-            imageUrl: item.imageUrl,
-        }));
-
-        res.status(200).json({bucket: bucketItems});
-    } catch (error) {
-        console.error('Error fetching bucket item:', error.message);
-        res.status(500).send('Server error')
-    }
-}
+};

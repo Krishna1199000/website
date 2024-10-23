@@ -12,3 +12,9 @@ export const userAtom = atom({
         lastname: ""
     },
 })
+
+
+export const bucketAtom = atom({
+    key: 'bucketAtom',
+    default: [], // This will hold the cart items
+});

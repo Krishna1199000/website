@@ -250,3 +250,57 @@ export const buyProducts = async (token) => {
         }
     }
 };
+export const viewBucket = async (token) => {
+    try {
+        const response = await apiConnector(
+            "GET",
+            `${BASE_URL}/user/bucket`,
+            null,
+            { headers: { Authorization: `Bearer ${token}` } }
+        );
+        if (response.status === 200) {
+            return response.data;
+        } else {
+            throw new Error(response.data.message);
+        }
+    } catch (error) {
+        console.error("Error fetching bucket...", error.message);
+        throw error;
+    }
+};
+export const buyAllProducts = async (token) => {
+    try {
+        const response = await apiConnector(
+            "POST",
+            `${BASE_URL}/user/buy-all`,
+            null,
+            { headers: { Authorization: `Bearer ${token}` } }
+        );
+        if (response.status === 200) {
+            return response.data;
+        } else {
+            throw new Error(response.data.message);
+        }
+    } catch (error) {
+        console.error("Error buying products...", error.message);
+        throw error;
+    }
+};
+export const getUserReceipt = async (token) => {
+    try {
+        const response = await apiConnector(
+            "GET",
+            `${BASE_URL}/user/receipt`,
+            null,
+            { headers: { Authorization: `Bearer ${token}` } }
+        );
+        if (response.status === 200) {
+            return response.data;
+        } else {
+            throw new Error(response.data.message);
+        }
+    } catch (error) {
+        console.error("Error fetching receipt...", error.message);
+        throw error;
+    }
+};
