@@ -5,6 +5,8 @@ const User = require("../models/User/user");
 const bcrypt = require("bcrypt");
 const Product = require("../models/Admin/Product");
 const Transaction = require("../models/Transaction")
+const Bucket = require('../models/User/Bucket');
+
 require("dotenv").config();
 
 const UsersignupData = z.object({
@@ -337,10 +339,6 @@ exports.cancelOrder = async (req, res) => {
     }
 };
 
-// User Routes
-
-
-// User Controller
 const addToBucketSchema = z.object({
     productId: z.string().length(24, "Invalid product ID length"),
 });
@@ -364,7 +362,7 @@ exports.addToBucket = async (req, res) => {
             return res.status(404).json({ message: "Product not found" });
         }
 
-        // Add product to the user's bucket
+    
         user.bucket.push(product._id);
         await user.save();
 
@@ -414,7 +412,7 @@ exports.buyAllProducts = async (req, res) => {
             return res.status(400).json({ message: "Insufficient balance" });
         }
 
-        // Update user balance and product stock
+        
         user.balance -= totalAmount;
         for (const product of purchasedProducts) {
             product.stock -= 1;
@@ -422,16 +420,16 @@ exports.buyAllProducts = async (req, res) => {
         }
 
         user.purchases.push(...purchasedProducts.map(p => p._id));
-        user.bucket = [];  // Clear the bucket after purchase
+        user.bucket = []; 
         await user.save();
 
-        // Create a transaction record
+       
         const transaction = await Transaction.create({
             user: user._id,
             type: 'debit',
             amount: totalAmount,
             description: 'Purchased multiple products',
-            product: null,  // Since it's multiple products
+            product: null,  
         });
 
         res.status(200).json({
@@ -462,5 +460,41 @@ exports.getUserReceipt = async (req, res) => {
         res.status(200).json(receipt);
     } catch (error) {
         res.status(500).json({ message: 'Failed to get receipt', error: error.message });
+    }
+};
+exports.modifyBucket = async (req, res) => {
+    const { productId, action } = req.body;
+    const userId = req.userId;
+
+    try {
+        const bucket = await Bucket.findOne({ user: userId });
+
+        if (!bucket) {
+            return res.status(404).json({ message: "Bucket not found" });
+        }
+
+        const productIndex = bucket.products.findIndex(p => p.productId == productId);
+
+        if (action === 'add') {
+            if (productIndex > -1) {
+                bucket.products[productIndex].quantity += 1;
+            } else {
+                bucket.products.push({ productId, quantity: 1 });
+            }
+        } else if (action === 'remove') {
+            if (productIndex > -1 && bucket.products[productIndex].quantity > 1) {
+                bucket.products[productIndex].quantity -= 1;
+            } else {
+                bucket.products = bucket.products.filter(p => p.productId != productId);
+            }
+        } else {
+            return res.status(400).json({ message: "Invalid action" });
+        }
+
+        await bucket.save();
+        res.status(200).json({ message: "Bucket updated", bucket });
+    } catch (error) {
+        console.error("Error modifying bucket:", error); // Log the error for debugging
+        res.status(500).json({ message: "Error modifying bucket" });
     }
 };

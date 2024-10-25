@@ -304,3 +304,23 @@ export const getUserReceipt = async (token) => {
         throw error;
     }
 };
+
+export const modifyProductInBucket = async (productId,action, token) => {
+    try{
+        const response = await apiConnector(
+            "POST",
+            `${BASE_URL}/user/modify-bucket`,
+            {productId,action},
+            {headers: {Authorization: `Bearer ${token}`}}
+        );
+
+        if(response.status === 200) {
+            return response.data;
+        } else{
+            throw new Error(response.data.message);
+        }
+    }catch (error) {
+        console.error("Error modifying product in bucket...", error.message)
+        throw error;
+    }
+}
