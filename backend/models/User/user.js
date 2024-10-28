@@ -26,10 +26,6 @@ const userSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product',
     }],
-    bucket: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Product'
-    }]
 })
 
 module.exports = mongoose.model("User",userSchema);

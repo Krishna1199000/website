@@ -4,7 +4,7 @@ const BASE_URL = import.meta.env.VITE_BASE_URL_USER;
 
 export const Usersignup = async (firstname, lastname, email, password) => {
     try {
-        const response = await apiConnector("POST", `${BASE_URL}/user/UserSignup`, {
+        const response = await apiConnector("POST", `${BASE_URL}/UserSignup`, {
             firstname,
             lastname,
             username: email,
@@ -25,7 +25,7 @@ export const Usersignup = async (firstname, lastname, email, password) => {
 
 export const Usersignin = async (email, password) => {
     try {
-        const response = await apiConnector("POST", `${BASE_URL}/user/UserSignin`, {
+        const response = await apiConnector("POST", `${BASE_URL}/UserSignin`, {
             username: email,
             password,
         });
@@ -47,7 +47,7 @@ export const addMoney = async (amount, token) => {
     try {
         const response = await apiConnector(
             "POST",
-            `${BASE_URL}/user/add-money`,
+            `${BASE_URL}/add-money`,
             { amount },
             { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -70,7 +70,7 @@ export const fetchUserPurchases = async (token) => {
     try {
         const response = await apiConnector(
             "GET",
-            `${BASE_URL}/user/purchases`,
+            `${BASE_URL}/purchases`,
             null, 
             { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -90,7 +90,7 @@ export const updateUserPassword = async (currentPassword, newPassword, token) =>
     try {
         const response = await apiConnector(
             "PUT",
-            `${BASE_URL}/user/updateCredentials`,
+            `${BASE_URL}/updateCredentials`,
             { currentPassword, newPassword },
             { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -109,7 +109,7 @@ export const updateUserPassword = async (currentPassword, newPassword, token) =>
 
 export const fetchProducts = async () => {
     try {
-        const response = await apiConnector("GET", `${BASE_URL}/user/products`);
+        const response = await apiConnector("GET", `${BASE_URL}/products`);
         if (response.status === 200) {
             return response.data; 
         } else {
@@ -126,7 +126,7 @@ export const buyProduct = async (productId, token) => {
     try {
         const response = await apiConnector(
             "POST",
-            `${BASE_URL}/user/purchase`, 
+            `${BASE_URL}/purchase`, 
             { productId },
             { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -154,7 +154,7 @@ export const buyProduct = async (productId, token) => {
 };
 export const searchProducts = async (query, token) => {
     try {
-        const response = await apiConnector("POST", `${BASE_URL}/user/search`, { query }, {
+        const response = await apiConnector("POST", `${BASE_URL}/search`, { query }, {
             headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -174,7 +174,7 @@ export const getBalance = async(token) => {
     try{
         const response = await apiConnector(
             "GET",
-            `${BASE_URL}/user/balance`,
+            `${BASE_URL}/balance`,
             null,
             {headers: {Authorization: `Bearer ${token}`}}
         );
@@ -192,7 +192,7 @@ export const getBalance = async(token) => {
 
 export const cancelOrderApi = async (token, data) => {
     try {
-        const response = await apiConnector('POST', `${BASE_URL}/user/cancel-order`, data, {
+        const response = await apiConnector('POST', `${BASE_URL}/cancel-order`, data, {
             headers: { Authorization: `Bearer ${token}` },
         });
         return response;
@@ -202,125 +202,49 @@ export const cancelOrderApi = async (token, data) => {
     }
 };
 
-export const addProductToBucket = async (productId, token) => {
-    try {
-        const response = await apiConnector(
-            "POST",
-            `${BASE_URL}/user/add-to-bucket`,
-            { productId },
-            { headers: { Authorization: `Bearer ${token}` } }
-        );
-
-        if (response.status === 200) {
-            return response.data; 
-        } else {
-            throw new Error(response.data.message);
-        }
-    } catch (error) {
-        console.error("Error adding product to bucket...", error.message);
-        throw error;
-    }
-};
-
-
-export const buyProducts = async (token) => {
-    try {
-        const response = await apiConnector(
-            "POST",
-            `${BASE_URL}/user/buy`,
-            null, 
-            { headers: { Authorization: `Bearer ${token}` } }
-        );
-
-        if (response.status === 200) {
-            return response.data;
-        } else {
-            throw new Error(response.data.message);
-        }
-    } catch (error) {
-        if (error.response) {
-            console.error("Error purchasing products:", error.response.data);
-            throw new Error(error.response.data.message || 'Purchase failed.');
-        } else if (error.request) {
-            console.error("No response received:", error.request);
-            throw new Error('No response from server.');
-        } else {
-            console.error("Error:", error.message);
-            throw new Error('An unexpected error occurred.');
-        }
-    }
-};
 export const viewBucket = async (token) => {
-    try {
-        const response = await apiConnector(
-            "GET",
-            `${BASE_URL}/user/bucket`,
-            null,
-            { headers: { Authorization: `Bearer ${token}` } }
-        );
-        if (response.status === 200) {
-            return response.data;
-        } else {
-            throw new Error(response.data.message);
-        }
-    } catch (error) {
-        console.error("Error fetching bucket...", error.message);
-        throw error;
-    }
-};
-export const buyAllProducts = async (token) => {
-    try {
-        const response = await apiConnector(
-            "POST",
-            `${BASE_URL}/user/buy-all`,
-            null,
-            { headers: { Authorization: `Bearer ${token}` } }
-        );
-        if (response.status === 200) {
-            return response.data;
-        } else {
-            throw new Error(response.data.message);
-        }
-    } catch (error) {
-        console.error("Error buying products...", error.message);
-        throw error;
-    }
-};
-export const getUserReceipt = async (token) => {
-    try {
-        const response = await apiConnector(
-            "GET",
-            `${BASE_URL}/user/receipt`,
-            null,
-            { headers: { Authorization: `Bearer ${token}` } }
-        );
-        if (response.status === 200) {
-            return response.data;
-        } else {
-            throw new Error(response.data.message);
-        }
-    } catch (error) {
-        console.error("Error fetching receipt...", error.message);
-        throw error;
-    }
-};
-
-export const modifyProductInBucket = async (productId,action, token) => {
     try{
-        const response = await apiConnector(
-            "POST",
-            `${BASE_URL}/user/modify-bucket`,
-            {productId,action},
-            {headers: {Authorization: `Bearer ${token}`}}
-        );
+        const response = await apiConnector('GET', `${BASE_URL}/bucket`,null,{
+            headers: {Authorization: `Bearer ${token}`},
+        })
+        return response;
+    } catch (error) {
+        console.log('View bucket error:',error);
+        throw error;
+    }
+};
 
-        if(response.status === 200) {
-            return response.data;
-        } else{
-            throw new Error(response.data.message);
-        }
-    }catch (error) {
-        console.error("Error modifying product in bucket...", error.message)
+export const addToBucket = async (token, productId,quantity = 1) => {
+    try{
+        const response = await apiConnector('POST', `${BASE_URL}/bucket/add`, {productId,quantity},{
+            headers: {Authorization: `Bearer ${token}`},
+        });
+        return response;
+    } catch (error){
+        console.log("add to bucket error:",error);
+        throw error;
+    }
+};
+export const removeFromBucket = async (token,productId) => {
+    try{
+        const response = await apiConnector('POST',`${BASE_URL}/bucket/remove`,{productId},{
+            headers: {Authorization: `Bearer ${token}`},
+        })
+        return response;
+    } catch (error){
+        console.log("remove from bucket error:", error);
+        throw error;
+    }
+}
+
+export const buyAllProducts = async (token) => {
+    try{
+        const response = await apiConnector("POST", `${BASE_URL}/bucket/purchase`,null,{
+            headers: {Authorization: `Bearer ${token}`},
+        })
+        return response;
+    } catch (error){
+        console.log("buy all products error:", error);
         throw error;
     }
 }

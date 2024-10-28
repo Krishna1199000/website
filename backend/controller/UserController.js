@@ -1,11 +1,11 @@
 const mongoose = require('mongoose');
 const jwt = require("jsonwebtoken");
-const {z} = require("zod");
+const { z } = require("zod");
 const User = require("../models/User/user");
 const bcrypt = require("bcrypt");
 const Product = require("../models/Admin/Product");
 const Transaction = require("../models/Transaction")
-const Bucket = require('../models/User/Bucket');
+const BucketItem = require("../models/User/BucketItem");
 
 require("dotenv").config();
 
@@ -16,9 +16,9 @@ const UsersignupData = z.object({
     lastname: z.string(),
 });
 
-exports.Usersignup = async (req,res) => {
-    try{
-        const {username, password, firstname,lastname} = req.body;
+exports.Usersignup = async (req, res) => {
+    try {
+        const { username, password, firstname, lastname } = req.body;
 
         const validatedInputs = UsersignupData.safeParse({
             username,
@@ -27,16 +27,16 @@ exports.Usersignup = async (req,res) => {
             lastname,
         });
 
-        if(!validatedInputs.success){
-            return res.status(411).json({message: "Incorrect inputs"})
+        if (!validatedInputs.success) {
+            return res.status(411).json({ message: "Incorrect inputs" })
 
         }
-        if(await User.findOne({username: username})){
-            return res.status(411).json({message: "Email already taken"});
+        if (await User.findOne({ username: username })) {
+            return res.status(411).json({ message: "Email already taken" });
 
         }
 
-        const hashedPassword = await bcrypt.hash(password,10);
+        const hashedPassword = await bcrypt.hash(password, 10);
 
         const user = await User.create({
             username: username,
@@ -46,8 +46,8 @@ exports.Usersignup = async (req,res) => {
         });
 
         const userId = user._id;
-        res.status(200).json({message: "User created successfully"});
-    } catch(error){
+        res.status(200).json({ message: "User created successfully" });
+    } catch (error) {
         console.error(error)
         res.status(500).json({
             success: false,
@@ -62,26 +62,26 @@ const UserSigninData = z.object({
     password: z.string(),
 });
 
-exports.Usersignin = async (req,res) => {
-    try{
+exports.Usersignin = async (req, res) => {
+    try {
 
-        const {username,password} = req.body;
+        const { username, password } = req.body;
 
-        const validatedInputs = UserSigninData.safeParse({username,password});
+        const validatedInputs = UserSigninData.safeParse({ username, password });
 
-        if(!validatedInputs.success){
-            return res.status(411).json({message: "Error while logging in"})
+        if (!validatedInputs.success) {
+            return res.status(411).json({ message: "Error while logging in" })
         }
 
-        const user = await User.findOne({username: username})
-        if(!user) {
-            return res.status(404).json({message: "User not registered"});
+        const user = await User.findOne({ username: username })
+        if (!user) {
+            return res.status(404).json({ message: "User not registered" });
         }
 
-        const token = await jwt.sign({userId: user._id}, process.env.JWT_SECRET);
+        const token = await jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
 
-        res.status(200).json({token: token})
-    } catch(error){
+        res.status(200).json({ token: token })
+    } catch (error) {
         console.error(error);
         res.status(500).json({
             success: false,
@@ -90,38 +90,38 @@ exports.Usersignin = async (req,res) => {
     }
 }
 const updatePasswordSchema = z.object({
-    oldPassword: z.string().min(6,'Old password must be at least 6 characters'),
-    newPassword: z.string().min(6,'New password must be at least 6 characters')
+    oldPassword: z.string().min(6, 'Old password must be at least 6 characters'),
+    newPassword: z.string().min(6, 'New password must be at least 6 characters')
 })
 
-exports.updatePassword = async (req,res) => {
-    try{
-        const {oldPassword,newPassword} = req.body
-        const validatedInputs = updatePasswordSchema.safeParse({oldPassword,newPassword})
-        if(!validatedInputs.success) {
-            return res.status(411).json({message: "Error while updating information", errors: validatedInputs.error.errors});
+exports.updatePassword = async (req, res) => {
+    try {
+        const { oldPassword, newPassword } = req.body
+        const validatedInputs = updatePasswordSchema.safeParse({ oldPassword, newPassword })
+        if (!validatedInputs.success) {
+            return res.status(411).json({ message: "Error while updating information", errors: validatedInputs.error.errors });
         }
 
         const user = await User.findById(req.userId);
 
-        if(!user){
-            return res.status(404).json({message: "User not found"});
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
         }
 
-        const isMatch = await bcrypt.compare(oldPassword,user.password);
-        if(!isMatch){
-            return res.status(400).json({message: 'Invalid old password'});
+        const isMatch = await bcrypt.compare(oldPassword, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ message: 'Invalid old password' });
         }
 
-        const hashedPassword = await bcrypt.hash(newPassword,10);
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
         user.password = hashedPassword;
 
         await user.save();
 
-        res.status(200).json({message: 'Password updated successfully'})
+        res.status(200).json({ message: 'Password updated successfully' })
     } catch (error) {
         console.error(error);
-        res.status(500).json({message: 'Server error'});
+        res.status(500).json({ message: 'Server error' });
     }
 }
 
@@ -192,7 +192,7 @@ exports.purchaseProduct = async (req, res) => {
         const product = await Product.findById(productId);
         if (!product) {
             return res.status(404).json({ msg: 'Product not found' });
-         }
+        }
 
         if (user.balance < product.price) {
             return res.status(400).json({ msg: 'Insufficient balance' });
@@ -223,8 +223,8 @@ exports.purchaseProduct = async (req, res) => {
         res.status(500).send('Server error');
     }
 };
-exports.getAllProducts = async (req,res) => {
-    try{
+exports.getAllProducts = async (req, res) => {
+    try {
         const products = await Product.find();
         res.json(products);
     } catch (error) {
@@ -234,22 +234,22 @@ exports.getAllProducts = async (req,res) => {
 };
 
 const SearchProductSchema = z.object({
-    query: z.string().min(1,"Search query cannot be empty"),
+    query: z.string().min(1, "Search query cannot be empty"),
 })
 
 
 exports.searchProducts = async (req, res) => {
     try {
-        const { query } = req.body; 
-        
+        const { query } = req.body;
+
 
         const validatedInputs = SearchProductSchema.safeParse({ query });
         if (!validatedInputs.success) {
             const errorMsg = validatedInputs.error.errors.map(err => err.message).join(', ');
-            return res.status(400).json({ message: errorMsg }); 
+            return res.status(400).json({ message: errorMsg });
         }
 
-        const regex = new RegExp(query, 'i'); 
+        const regex = new RegExp(query, 'i');
         const products = await Product.find({
             $or: [
                 { name: regex },
@@ -282,16 +282,16 @@ exports.getUserPurchases = async (req, res) => {
 };
 
 
-exports.getBalance = async (req,res) => {
-    try{
+exports.getBalance = async (req, res) => {
+    try {
         const user = await User.findById(req.userId).select('balance');
-        if(!user){
-            return res.status(404).json({message: "User not found"});
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
         }
-        res.json({balance: user.balance});
-    } catch(error){
+        res.json({ balance: user.balance });
+    } catch (error) {
         console.error(error);
-        res.status(500).json({message: "Server errror"})
+        res.status(500).json({ message: "Server errror" })
     }
 };
 exports.cancelOrder = async (req, res) => {
@@ -317,11 +317,11 @@ exports.cancelOrder = async (req, res) => {
             return res.status(404).json({ message: 'User or product not found' });
         }
 
-    
+
         user.balance += transaction.amount;
         await user.save();
 
-    
+
         product.stock += 1;
         await product.save();
 
@@ -339,162 +339,128 @@ exports.cancelOrder = async (req, res) => {
     }
 };
 
-const addToBucketSchema = z.object({
-    productId: z.string().length(24, "Invalid product ID length"),
-});
-
 exports.addToBucket = async (req, res) => {
     try {
         const { productId } = req.body;
-        const validatedInputs = addToBucketSchema.safeParse({ productId });
+        const userId = req.userId;
 
-        if (!validatedInputs.success) {
-            return res.status(400).json({ message: "Invalid product ID" });
+        let bucketItem = await BucketItem.findOne({ user: userId, product: productId });
+
+        if (bucketItem) {
+            bucketItem.quantity += 1;
+        } else {
+            bucketItem = new BucketItem({ user: userId, product: productId, quantity: 1 });
         }
 
-        const user = await User.findById(req.userId);
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
+        await bucketItem.save();
 
-        const product = await Product.findById(productId);
-        if (!product) {
-            return res.status(404).json({ message: "Product not found" });
-        }
-
-    
-        user.bucket.push(product._id);
-        await user.save();
-
-        res.status(200).json({ message: "Product added to bucket", bucket: user.bucket });
+        res.status(200).json({ message: "Product added to bucket", bucketItem });
     } catch (error) {
-        console.error("Error adding to bucket:", error);
-        res.status(500).json({ message: "Server error" });
+        console.error(error);
+        res.status(500).json({ message: "Server error while adding to bucket" });
     }
 };
+exports.removeFromBucket = async (req, res) => {
+    try {
+        const { productId } = req.body;
+        const userId = req.userId;
 
+        const bucketItem = await BucketItem.findOne({ user: userId, product: productId });
 
+        if (!bucketItem) {
+            return res.status(404).json({ message: "Product not found in bucket" });
+        }
+
+        if (bucketItem.quantity > 1) {
+            bucketItem.quantity -= 1;
+            await bucketItem.save();
+        } else {
+            await bucketItem.deleteOne();
+        }
+
+        res.status(200).json({ message: "Product removed from bucket" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server error while removing from bucket" });
+    }
+};
 exports.viewBucket = async (req, res) => {
     try {
-        const user = await User.findById(req.userId).populate('bucket');
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
+        const userId = req.userId;
 
-        res.status(200).json({ bucket: user.bucket });
+        const bucketItems = await BucketItem.find({ user: userId }).populate("product");
+
+        res.status(200).json({ bucket: bucketItems });
     } catch (error) {
-        console.error("Error fetching bucket:", error);
-        res.status(500).json({ message: "Server error" });
+        console.error(error);
+        res.status(500).json({ message: "Server error while viewing bucket" });
     }
 };
-
-
-exports.buyAllProducts = async (req, res) => {
+exports.purchaseBucketItems = async (req, res) => {
     try {
-        const user = await User.findById(req.userId).populate('bucket');
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
-
-        let totalAmount = 0;
-        const purchasedProducts = [];
-
-      
-        for (const product of user.bucket) {
-            if (product.stock < 1) {
-                return res.status(400).json({ message: `Product ${product.name} is out of stock` });
-            }
-            totalAmount += product.price;
-            purchasedProducts.push(product);
-        }
-
-        if (user.balance < totalAmount) {
-            return res.status(400).json({ message: "Insufficient balance" });
-        }
-
+        const userId = req.userId;
+        const user = await User.findById(userId);
         
-        user.balance -= totalAmount;
-        for (const product of purchasedProducts) {
-            product.stock -= 1;
-            await product.save();
+        if (!user) {
+            return res.status(404).json({ msg: "User not found" });
         }
 
-        user.purchases.push(...purchasedProducts.map(p => p._id));
-        user.bucket = []; 
+        const bucketItems = await BucketItem.find({ user: userId }).populate('product');
+
+        if (!bucketItems.length) {
+            return res.status(400).json({ msg: "Bucket is empty" });
+        }
+
+        let totalCost = 0;
+        const receipt = [];
+
+        for (const item of bucketItems) {
+            const { product, quantity } = item;
+
+            if (product.stock < quantity) {
+                return res.status(400).json({ msg: `Insufficient stock for ${product.name}` });
+            }
+
+            totalCost += product.price * quantity;
+            receipt.push({
+                productName: product.name,
+                quantity,
+                price: product.price,
+                total: product.price * quantity,
+            });
+        }
+
+        if (user.balance < totalCost) {
+            return res.status(400).json({ msg: "Insufficient balance" });
+        }
+
+        user.balance -= totalCost;
+        user.purchases.push(...bucketItems.map(item => item.product._id));
         await user.save();
 
-       
-        const transaction = await Transaction.create({
-            user: user._id,
-            type: 'debit',
-            amount: totalAmount,
-            description: 'Purchased multiple products',
-            product: null,  
-        });
+        for (const item of bucketItems) {
+            const { product, quantity } = item;
+            product.stock -= quantity;
+            await product.save();
+
+            await Transaction.create({
+                user: user._id,
+                type: 'debit',
+                amount: product.price * quantity,
+                description: `Purchased ${product.name}`,
+                product: product._id,
+            });
+        }
+
+        await BucketItem.deleteMany({ user: userId });
 
         res.status(200).json({
             message: "Purchase successful",
             balance: user.balance,
-            transaction,
-            purchasedProducts
+            receipt,
         });
     } catch (error) {
-        console.error("Error purchasing products:", error);
-        res.status(500).json({ message: "Server error" });
-    }
-};
-exports.getUserReceipt = async (req, res) => {
-    try {
-        const userId = req.user.id;
-        const user = await User.findById(userId).populate('purchases.product');
-
-        const receipt = {
-            purchases: user.purchases.map(item => ({
-                name: item.product.name,
-                price: item.product.price,
-                quantity: item.quantity,
-            })),
-            total: user.purchases.reduce((acc, item) => acc + item.product.price * item.quantity, 0),
-        };
-
-        res.status(200).json(receipt);
-    } catch (error) {
-        res.status(500).json({ message: 'Failed to get receipt', error: error.message });
-    }
-};
-exports.modifyBucket = async (req, res) => {
-    const { productId, action } = req.body;
-    const userId = req.userId;
-
-    try {
-        const bucket = await Bucket.findOne({ user: userId });
-
-        if (!bucket) {
-            return res.status(404).json({ message: "Bucket not found" });
-        }
-
-        const productIndex = bucket.products.findIndex(p => p.productId == productId);
-
-        if (action === 'add') {
-            if (productIndex > -1) {
-                bucket.products[productIndex].quantity += 1;
-            } else {
-                bucket.products.push({ productId, quantity: 1 });
-            }
-        } else if (action === 'remove') {
-            if (productIndex > -1 && bucket.products[productIndex].quantity > 1) {
-                bucket.products[productIndex].quantity -= 1;
-            } else {
-                bucket.products = bucket.products.filter(p => p.productId != productId);
-            }
-        } else {
-            return res.status(400).json({ message: "Invalid action" });
-        }
-
-        await bucket.save();
-        res.status(200).json({ message: "Bucket updated", bucket });
-    } catch (error) {
-        console.error("Error modifying bucket:", error); // Log the error for debugging
-        res.status(500).json({ message: "Error modifying bucket" });
+        console.error("Error during bucket purchase:", error);
+        res.status(500).send("Server error");
     }
 };

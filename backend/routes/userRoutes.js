@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const {Usersignup, Usersignin, updatePassword, addMoney, purchaseProduct, searchProducts, getUserPurchases, getBalance, cancelOrder,getAllProducts, addToBucket, viewBucket, buyAllProducts, getUserReceipt, modifyBucket} = require("../controller/UserController");
+const {Usersignup, Usersignin, updatePassword, addMoney, purchaseProduct, searchProducts, getUserPurchases, getBalance, cancelOrder,getAllProducts, addToBucket, removeFromBucket, viewBucket,purchaseBucketItems} = require("../controller/UserController");
 const {UserAuth} = require("../middleware/usermiddleware");
 
 router.post("/UserSignup",Usersignup);
@@ -13,9 +13,8 @@ router.get("/products",getAllProducts)
 router.post("/search", UserAuth,searchProducts); 
 router.get("/balance",UserAuth,getBalance)
 router.post("/cancel-order",UserAuth,cancelOrder)
-router.post('/add-to-bucket', UserAuth, addToBucket);
-router.get("/bucket",UserAuth,viewBucket)
-router.post("/buy-all",UserAuth,buyAllProducts);
-router.get('/receipt',UserAuth,getUserReceipt)
-router.post('/modify-bucket',UserAuth, modifyBucket);
+router.post("/bucket/add", UserAuth, addToBucket);
+router.post("/bucket/remove", UserAuth, removeFromBucket);
+router.get("/bucket", UserAuth, viewBucket);
+router.post("/bucket/purchase", UserAuth, purchaseBucketItems);
 module.exports = router;
