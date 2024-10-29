@@ -12,11 +12,10 @@ import ProductsList from './pages/ProductsList';
 import UserSignup from './pages/UserSignup';
 import UserSignin from './pages/UserSignin';
 import UserDashboard from './pages/UserDashboard';
-import BucketPage from './pages/BucketPage'; // Import the Bucket page
 import AddMoney from './pages/AddMoney';
 import UpdateUserPassword from './pages/UpdateUserPassword';
 import UserPurchases from './pages/UserPurchases';
-import ReceiptPage from './pages/ReceiptPage';
+
 
 
 import { AdmintokenAtom } from './stores/Adminatoms';
@@ -56,14 +55,7 @@ function App() {
                             </UserPrivateRoute>
                         }
                     />
-                    <Route
-                        path="/user/bucket"
-                        element={
-                            <UserPrivateRoute>
-                                <BucketPage />
-                            </UserPrivateRoute>
-                        }
-                    />
+                    
                     <Route
                         path="/user/add-money"
                         element={
@@ -88,22 +80,7 @@ function App() {
                             </UserPrivateRoute>
                         }
                     />
-                    <Route
-                        path="/user/bucket"
-                        element={
-                            <UserPrivateRoute>
-                                <BucketPage />
-                            </UserPrivateRoute>
-                        }
-                    />
-                    <Route
-                        path="/user/receipt"
-                        element={
-                            <UserPrivateRoute>
-                                <ReceiptPage />
-                            </UserPrivateRoute>
-                        }
-                    />
+                    
 
                     {/* Admin routes */}
                     <Route path="/admin-signup" element={<AdminSignup />} />

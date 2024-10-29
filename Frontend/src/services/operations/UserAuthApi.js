@@ -214,17 +214,19 @@ export const viewBucket = async (token) => {
     }
 };
 
-export const addToBucket = async (token, productId,quantity = 1) => {
-    try{
-        const response = await apiConnector('POST', `${BASE_URL}/bucket/add`, {productId,quantity},{
-            headers: {Authorization: `Bearer ${token}`},
+export const addToBucket = async (token, productId, quantity = 1) => {
+    try {
+        console.log("Adding to bucket with token:", token);
+        const response = await apiConnector('POST', `${BASE_URL}/bucket/add`, { productId, quantity }, {
+            headers: { Authorization: `Bearer ${token}` },
         });
         return response;
-    } catch (error){
-        console.log("add to bucket error:",error);
+    } catch (error) {
+        console.log("Add to bucket error:", error.response ? error.response.data : error.message);
         throw error;
     }
 };
+
 export const removeFromBucket = async (token,productId) => {
     try{
         const response = await apiConnector('POST',`${BASE_URL}/bucket/remove`,{productId},{

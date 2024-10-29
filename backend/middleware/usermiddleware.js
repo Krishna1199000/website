@@ -15,7 +15,8 @@ exports.UserAuth = async (req, res, next) => {
         }
 
         const token = authHeader.replace("Bearer ", "").trim();
-        console.log("Token:", token); 
+        console.log("Token:", token);
+        console.log("Token Length:", token.length);
 
         if (!token) {
             return res.status(403).json({ message: "Token not found" });
