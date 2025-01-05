@@ -5,19 +5,9 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
-  },
-  plugins: [],
-}
-/** @type {import('tailwindcss').Config} */
-module.exports = {
-  content: [
-    "./src/**/*.{js,jsx,ts,tsx}",
-  ],
-  theme: {
     extend: {
       colors: {
-        primary: '#6B46C1', // Customize as needed
+        primary: '#6B46C1',
         secondary: '#B794F4',
       },
       animation: {
@@ -35,4 +25,3 @@ module.exports = {
   },
   plugins: [],
 }
-
