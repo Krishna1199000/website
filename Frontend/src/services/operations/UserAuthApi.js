@@ -192,7 +192,7 @@ export const getBalance = async(token) => {
 
 export const cancelOrderApi = async (token, data) => {
     try {
-        const response = await apiConnector('POST', `${BASE_URL}/cancel-order`, data, {
+        const response   = await apiConnector('POST', `${BASE_URL}/cancel-order`, data, {
             headers: { Authorization: `Bearer ${token}` },
         });
         return response;

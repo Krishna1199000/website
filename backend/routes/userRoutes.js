@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const {Usersignup, Usersignin, updatePassword, addMoney, purchaseProduct, searchProducts, getUserPurchases, getBalance, cancelOrder,getAllProducts, addToBucket, removeFromBucket, viewBucket,purchaseBucketItems} = require("../controller/UserController");
+const {Usersignup, Usersignin, updatePassword, addMoney, purchaseProduct, searchProducts, getUserPurchases, getBalance, cancelOrder,getAllProducts,purchaseBucketItems,viewBucket,removeFromBucket,addToBucket} = require("../controller/UserController");
 const {UserAuth} = require("../middleware/usermiddleware");
 
 router.post("/UserSignup",Usersignup);

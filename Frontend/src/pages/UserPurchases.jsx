@@ -4,8 +4,7 @@ import { useRecoilValue } from 'recoil';
 import { UsertokenAtom } from '../stores/Useratoms';
 import { toast } from 'react-toastify';
 import styled from 'styled-components';
-import { cancelOrderApi, fetchUserPurchases } from '../services/operations/UserAuthApi'; // Import the function
-
+import { cancelOrderApi, fetchUserPurchases } from '../services/operations/UserAuthApi';
 
 const Container = styled.div`
     padding: 20px;
@@ -37,38 +36,44 @@ const CancelButton = styled.button`
         background-color: #ff7875;
     }
 `;
+
 const UserPurchases = () => {
     const token = useRecoilValue(UsertokenAtom);
     const [purchases, setPurchases] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         fetchPurchases();
-    }, []);
+    }, [token]);
 
     const fetchPurchases = async () => {
         try {
-            const data = await fetchUserPurchases(token); // Use the new service function
+            setLoading(true);
+            const data = await fetchUserPurchases(token);
             setPurchases(data);
+            setLoading(false);
         } catch (error) {
             console.error(error);
             toast.error('Failed to fetch purchases.');
+            setLoading(false);
         }
     };
+
     const cancelOrder = async (transactionId) => {
         try {
             const response = await cancelOrderApi(token, { transactionId });
-            if (response.status === 200) {
-                toast.success('Order cancelled successfully.');
-                fetchPurchases(); 
-            } else {
-                toast.error(response.data.message || 'Failed to cancel order.');
-            }
+            toast.success('Order cancelled successfully.');
+            fetchPurchases(); 
         } catch (error) {
             console.error(error);
-            toast.error('Failed to cancel order.');
+            toast.error(error.response?.data?.message || 'Failed to cancel order.');
         }
     };
     
+    if (loading) {
+        return <div>Loading purchases...</div>;
+    }
+
     return (
         <>
             <UserNavbar />
@@ -82,8 +87,7 @@ const UserPurchases = () => {
                             <PurchaseItem key={purchase._id}>
                                 <h3>{purchase.name}</h3>
                                 <p>Price: ₹{purchase.price}</p>
-                                {/* <p>Date: {new Date(purchase.date).toLocaleDateString()}</p> */}
-                                <CancelButton onClick={()=> cancelOrder(purchase.transactionId)}>
+                                <CancelButton onClick={() => cancelOrder(purchase._id)}>
                                     Cancel Order
                                 </CancelButton>
                             </PurchaseItem>

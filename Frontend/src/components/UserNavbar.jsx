@@ -1,15 +1,9 @@
-
-
 import React, { useState } from 'react';
-import { FaShoppingCart } from 'react-icons/fa';
-import { Link, useNavigate } from 'react-router-dom';
 import { FaBars } from 'react-icons/fa';
-import { useSetRecoilState , useRecoilValue} from 'recoil';
+import { Link, useNavigate } from 'react-router-dom';
+import { useSetRecoilState } from 'recoil';
 import { UsertokenAtom } from '../stores/Useratoms';
 import styled from 'styled-components';
-import { bucketAtom } from '../stores/Useratoms';
-
-
 
 const Nav = styled.nav`
     background: #333;
@@ -36,7 +30,6 @@ const Hamburger = styled(FaBars)`
         display: block;
     }
 `;
-
 
 const Menu = styled.ul`
     list-style: none;
@@ -76,7 +69,6 @@ const MenuItem = styled.li`
 const UserNavbar = () => {
     const [isOpen, setIsOpen] = useState(false);
     const setToken = useSetRecoilState(UsertokenAtom);
-    const bucketItems = useRecoilValue(bucketAtom);
     const navigate = useNavigate();
 
     const handleLogout = () => {
@@ -87,7 +79,7 @@ const UserNavbar = () => {
 
     return (
         <Nav>
-            <NavLogo to="/user/dashboard">jay Hinglaj Tailor</NavLogo>
+            <NavLogo to="/user/dashboard">Jay Hinglaj Tailor</NavLogo>
             <Hamburger size={24} onClick={() => setIsOpen(!isOpen)} />
             
             <Menu $isOpen={isOpen}>
@@ -102,12 +94,6 @@ const UserNavbar = () => {
                 </MenuItem>
                 <MenuItem>
                     <Link to="/user/updateCredentials">Update Password</Link>
-                </MenuItem>
-                <MenuItem>
-                    <Link to="/user/bucket">
-                        <FaShoppingCart size={20} />
-                        <span>({bucketItems.length})</span> {/* Shows item count */}
-                    </Link>
                 </MenuItem>
                 <MenuItem>
                     <Link to="/user/purchases">My Purchases</Link>
